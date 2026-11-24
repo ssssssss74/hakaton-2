@@ -1,0 +1,75 @@
+Build a complete, production-quality, interactive web application in React, TypeScript, Tailwind CSS, Lucide React icons, and Recharts for an educational legal-tech hackathon project called **"E-Tergov Lab — Virtual Tergov Simulyatori (102 dan Sudgacha)"** designed for students of the Law Enforcement Academy of the Republic of Uzbekistan (Huquqni muhofaza qilish akademiyasi — HMQA).
+
+CRITICAL LANGUAGE REQUIREMENT:
+- 100% of the user-facing UI, navigation, buttons, labels, tooltips, case files, legal documents, AI dialogue, charts, and feedback MUST be written in clean, literary **Uzbek (Latin script)** using accurate Uzbekistan Criminal Procedure Code (JPK — Jinoyat-protsessual kodeksi) terminology. Do NOT leave any English or Russian labels in the UI.
+
+VISUAL DESIGN & THEME:
+- Modern, authoritative government/legal-tech "E-tergov" workspace aesthetic.
+- Color palette: Deep Navy sidebar/header (`#0F172A` / `#1E293B`), crisp light workspace (`#F8FAFC`), white cards with subtle borders (`#E2E8F0`), Royal Blue primary accent (`#1D4ED8`), Subtle Gold badge accent (`#D97706`), and semantic traffic-light feedback colors (Emerald Green `#10B981`, Amber `#F59E0B`, Crimson Red `#EF4444`).
+- Persistent Top Header Bar showing:
+  1. Project Logo & Title: "E-Tergov Lab | HMQA"
+  2. Active Case Procedural Timer ("Protsessual muddat taymeri") that counts down or consumes simulated hours whenever the student takes an action.
+  3. Student Rank Badge ("Stajyor" → "Tergovchi" → "Katta tergovchi" → "O'ta muhim ishlar bo'yicha tergovchi") + Current Score.
+  4. "Demodan qayta boshlash" (Reset Demo) button that clears `localStorage` for live hackathon presentations.
+- Left Sidebar Navigation with 4 main views:
+  1. **102 Navbatchilik & Bosh sahifa** (Dashboard & Incoming 102 Case)
+  2. **Tergov jarayoni (102 → Sud)** (Main 6-Step Interactive Case Workspace)
+  3. **Reyting va Tergov dueli** (Student Leaderboard, Ranks & Weekly Duel)
+  4. **O'qituvchi tahlil paneli** (Instructor Analytics Dashboard & Case Creator)
+
+CORE FEATURE — COMPLETE END-TO-END INTERACTIVE CASE (MVP):
+Pre-load 1 rich, realistic Uzbek criminal investigation case: **Kiberfiribgarlik (Bank kartasidan 42 500 000 so'mni firibgarlik yo'li bilan yechib olish, JK 168-modda / 169-modda tahlili)** assigned individually to the student.
+
+Implement the **6-Step Investigation Pipeline** inside the "Tergov jarayoni" view with a top progress stepper and **branching consequences ("Xato narxi")**: every mistake (skipping a procedural step, exceeding time, asking a leading/coercive question, or failing an ethics dilemma) is logged into the case state and directly affects the Prosecutor Review and Final Court Verdict.
+
+Step 1 — **102 Xabari va Dastlabki qaror**:
+- Display realistic 102 emergency call card (case number, date/time, victim's statement, incident summary).
+- Student chooses the initial procedural action (e.g., properly registering and starting *Tergovga qadar tekshiruv* within JPK limits vs improper delay or informal action).
+- Consumes simulated time and logs decision quality.
+
+Step 2 — **Raqamli Dalillar va «Dalillar doskasi» (Evidence Board)**:
+- Interactive tabbed viewer with 3 realistic mock digital evidence items:
+  1. *Bank ko'chirmasi* (Transaction table showing suspicious P2P transfer to a mule card + timestamp).
+  2. *Telegram/SMS yozishma skrinshoti* (Styled chat UI mockup showing phishing link and fake bank message).
+  3. *Aloqa operatori billingi / IP jurnali* (Table with phone number, IMEI, IP address, and cell tower location).
+- Interactive **Dalillar doskasi** where the student selects/pins the 3 critical clues (clue checklist/connection cards) to uncover the contradiction in the suspect's story.
+
+Step 3 — **Idoralararo so'rovlar va Jinoyat ishi qo'zg'atish**:
+- **Idoralararo so'rovlar moduli**: Buttons to send official electronic requests to partner agencies (*IIV Tezkor-qidiruv*, *Kiber-ekspertiza*, *Bank/Aloqa operatori*, *Bojxona/FVV* templates). Clicking sends the request, consumes simulated hours, and returns realistic official response cards.
+- **Protsessual hujjat konstruktori (JPK auditi)**: A structured form for *"Jinoyat ishi qo'zg'atish to'g'risida qaror"* where the student selects the legal qualification (JK article), procedural basis (JPK article), mandatory requisites, and investigative actions. Clicking "JPK auditidan o'tkazish" automatically validates all fields and highlights any missing or incorrect requisites.
+
+Step 4 — **AI-So'roq, «Svetofor» indikatori, Kutilmagan burilish va Etika dilemmasi**:
+- Interactive chat interface with an AI-powered **Gumonlanuvchi** (Suspect) powered by the `@google/genai` Gemini API (using `process.env.API_KEY` or environment key). Include a smart deterministic fallback mode if the API call fails or no key is set so the live demo never breaks.
+- Provide 3 quick-suggest starter questions plus a free-text input box so the student can type any question in Uzbek.
+- **Real-time «Svetofor» Coach**: For every question the student sends, evaluate it (via Gemini structured JSON output or fallback rules) and display a live traffic-light badge next to the message:
+  - **Yashil (To'g'ri taktika):** Open-ended, lawful investigative question (+10 ball).
+  - **Sariq (Aniqlashtirish kerak):** Slightly vague or repetitive (+3 ball).
+  - **Qizil (JPK xavfi!):** Leading, coercive, or rights-violating question (-10 ball, logged as procedural violation).
+- **«Kutilmagan burilish» (Dynamic Plot Twist):** After 2 questions, trigger an alert banner: the suspect suddenly claims an alibi ("O'sha paytda boshqa tumanda edim") or a witness changes testimony—forcing the student to confront them using evidence from Step 2.
+- **Inson huquqlari va Etika dilemmasi (PF-257):** Pop up a realistic ethical dilemma card (e.g., an informal suggestion to skip lawyer notification to get a quick confession) with lawful vs unlawful choices; update the student's *Halollik va etika indeksi*.
+
+Step 5 — **Ayblov xulosasi va Prokuror nazorati**:
+- Student reviews collected evidence, confirms final indictment checklist, and submits to the **Virtual Prokuror**.
+- The Virtual Prokuror audits the student's actual action log from Steps 1–4:
+  - If critical mistakes occurred (e.g., missed JPK deadline, red ethics violation, unverified evidence), the Prosecutor flags them with JPK explanations and shows the penalty ("Xato narxi")—allowing either correction or proceeding with risk.
+
+Step 6 — **Virtual Sud Majlisi & «Xatolar xaritasi» (Timeline Debriefing)**:
+- **Virtual Sud Majlisi**: An interactive final round where **AI-Advokat** challenges the weakest point from the student's actual log (using Gemini API with fallback), the student responds to defend the case, and **AI-Sudya** issues the final verdict (*Ayblov tasdiqlandi* or *Ish qayta tergovga qaytarildi*).
+- **«Xatolar xaritasi» (Timeline Debriefing)**: A visual chronological timeline of all steps taken by the student, color-coded (Green/Amber/Red), showing exact JPK articles respected or violated, plus final scores across 4 KPIs:
+  1. *Protsessual aniqlik (%)*
+  2. *Muddatlarga rioya (%)*
+  3. *Dalillar mustahkamligi (%)*
+  4. *Sudga bexato o'tish ulushi (%)*
+
+VIEW 3 — **Reyting va Tergov dueli**:
+- Realistic Uzbek student leaderboard table showing Rank, Student Name (sample HMQA cadet/student profiles), Career Title (*Stajyor / Tergovchi / Katta tergovchi / O'ta muhim ishlar*), all 4 KPI scores, and Total Score—dynamically including the current user's live score!
+- Highlight card for the weekly **"Guruhlararo Tergov dueli"** competition and a preview badge for **"Rolli multiplayer (Tergovchi – Prokuror – Advokat)"**.
+
+VIEW 4 — **O'qituvchi tahlil paneli (Instructor Analytics)**:
+- Clean Recharts bar/horizontal charts showing group-wide error hotspots across JPK stages (e.g., "Dalillarni rasmiylashtirish — 62% xato", "So'roq taktikasi — 44% xato", "Protsessual muddatlar — 31% xato").
+- Student performance summary table ("Tergovchi raqamli portfoliosi" preview).
+- Interactive **"Yangi kazus qo'shish"** modal form allowing an instructor to add a new custom case title, crime category, 102 summary, and difficulty level into the local state.
+
+TECHNICAL QUALITY:
+- Persist progress, score, timeline logs, and custom cases in `localStorage`.
+- Ensure responsive layout, clean typography, smooth transitions, zero console errors, and complete Uzbek Latin copy throughout.
