@@ -86,6 +86,54 @@ export const CASE_02_KNIFE_NOTE = {
     'GPS/BTS billingi',
     'Restoran kassa kamerasi + to‘lov cheki (21:22)',
   ],
+  prosecutorChecklist: [
+    {
+      id: 'case02_chk_scene',
+      label:
+        'Hodisa joyini ko‘zdan kechirish bayonnomasi, Dalil_Pichoq (№ 2026/11-418) va Dalil_Xat (№ 2026/11-419) muhrlanishi JPK 137, 203–204-moddalarga mos',
+    },
+    {
+      id: 'case02_chk_electronic',
+      label:
+        'Smart-Lock PIN #4821 jurnali, GPS/BTS billingi va restoran kassa kamerasi yozuvi (21:22) JPK 95¹, 204²-moddalar tartibida elektron dalil sifatida rasmiylashtirilgan',
+    },
+    {
+      id: 'case02_chk_expertise',
+      label:
+        'Daktiloskopik-DNK va sud-xatshunoslik ekspertizalari JPK 172, 180, 184-moddalar asosida tayinlanib, ekspertlar JK 238-modda bo‘yicha ogohlantirilgan',
+    },
+    {
+      id: 'case02_chk_indictment',
+      label:
+        'Ayblov xulosasi JK 97-modda 1-qismi bilan to‘g‘ri kvalifikatsiya qilinib, JPK 384-modda talablariga muvofiq prokurorga taqdim etilgan',
+    },
+  ],
+  virtualCourt: {
+    advocateChallenge: {
+      advocateArgument:
+        'Hurmatli sud raisi! Tergov organi Smart-Lock PIN #4821 jurnalini gumonlanuvchi J. Karimovga bog‘lamoqda, biroq PIN-kod uchinchi shaxsga ham ma’lum bo‘lishi mumkin — qurilmaning biometrik autentifikatsiyasi mavjud emas! Bundan tashqari, Dalil_Xat bo‘yicha xatshunoslik ekspertizasi namunalari JPK 204² va 95¹-moddalari talablarini buzgan holda olingan. Ushbu dalillarni nomaqbul deb topib, ishni qayta tergovga qaytarishingizni talab qilaman!',
+      targetPoint: 'Smart-Lock #4821 autentifikatsiyasi va Dalil_Xat namunalari maqbulligi',
+      jpkRef: 'JPK 95¹, 184, 204²-moddalar',
+    },
+    verdicts: {
+      approved: {
+        verdict: 'approved' as const,
+        verdictTitle: 'Ayblov tasdiqlandi — JK 97-modda 1-qismi bo‘yicha sud hukmi e’lon qilindi',
+        judgeReasoning:
+          'Sud tergovchining asosli raddiyasini inobatga oldi: Smart-Lock PIN #4821 (21:14–21:38) jurnali alohida emas, balki GPS/BTS billingi, soat 21:22 dagi restoran kassa kamerasi tasviri, Dalil_Pichoq dastasidagi daktiloskopik-DNK mosligi (№ 2026/11-418) hamda Dalil_Xat xatshunoslik xulosasi (№ 2026/11-419) bilan uzviy dalillar zanjirini tashkil etadi. Barcha materiallar JPK 95¹, 184, 204²-moddalarga muvofiq rasmiylashtirilgan.',
+        improvementAdvice:
+          'A’lo darajadagi sud himoyasi! Raqamli va moddiy dalillarni o‘zaro uyg‘unlashtirib, himoyachining JPK 95¹-modda bo‘yicha e’tirozini to‘liq bartaraf etdingiz.',
+      },
+      returned: {
+        verdict: 'returned' as const,
+        verdictTitle: 'Ish qayta tergovga qaytarildi (JPK 416 / 419-modda tartibida)',
+        judgeReasoning:
+          'Himoyachining JPK 95¹ va 204²-moddalarga tayangan e’tirozi qisman asosli deb topildi. Smart-Lock #4821 jurnalining haqiqiyligi, Dalil_Xat qiyosiy namunalari olingan bayonnoma yoki himoya huquqiga doir protsessual kamchiliklar bartaraf etilmagani sababli JK 97-modda 1-qismi bo‘yicha hukm chiqarish imkonsiz.',
+        improvementAdvice:
+          'Elektron dalillarni (Smart-Lock, kamera, billing) mutaxassis ishtirokida hash-summa bilan muhrlang va ekspertiza namunalarini JPK 184, 204²-moddalar talabiga qat’iy rioya qilgan holda rasmiylashtiring.',
+      },
+    },
+  },
 };
 
 export const STEP_DEFINITIONS = [
@@ -561,7 +609,7 @@ export function createInitialState(): SimulationState {
     aiEngine: 'gemini',
     activeView: 'dashboard',
     currentStep: 1,
-    maxUnlockedStep: 1,
+    maxUnlockedStep: 6,
     totalHoursBudget: ACTIVE_CASE.proceduralDeadlineHours,
     hoursUsed: 0,
     baseScore: 50,

@@ -109,53 +109,63 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
         />
       )}
 
-      {/* Top Stepper */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 overflow-x-auto">
-        <div className="flex items-center justify-between min-w-[700px] gap-2">
-          {STEP_DEFINITIONS.map((step) => {
-            const isCurrent = step.id === currentStep;
-            const isUnlocked = step.id <= state.maxUnlockedStep;
-            const isCompleted =
-              (step.id === 1 && state.step1Completed) ||
-              (step.id === 2 && state.step2Completed) ||
-              (step.id === 3 && state.step3Completed) ||
-              (step.id === 4 && state.step4Completed) ||
-              (step.id === 5 && state.step5Completed) ||
-              (step.id === 6 && state.step6Completed);
+      {/* Top Stepper — All 6 Steps Open for Free Navigation */}
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+          <span>
+            Barcha 6 protsessual bosqich ochiq — taqdimot davomida istalgan bosqichga to‘g‘ridan-to‘g‘ri o‘ting
+          </span>
+          <button
+            type="button"
+            onClick={() => onNavigate('presentation')}
+            className="text-[#1D4ED8] hover:underline font-semibold whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            Taqdimot planshetiga qaytish →
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <div className="flex items-center justify-between min-w-[700px] gap-2">
+            {STEP_DEFINITIONS.map((step) => {
+              const isCurrent = step.id === currentStep;
+              const isCompleted =
+                (step.id === 1 && state.step1Completed) ||
+                (step.id === 2 && state.step2Completed) ||
+                (step.id === 3 && state.step3Completed) ||
+                (step.id === 4 && state.step4Completed) ||
+                (step.id === 5 && state.step5Completed) ||
+                (step.id === 6 && state.step6Completed);
 
-            return (
-              <button
-                key={step.id}
-                type="button"
-                disabled={!isUnlocked}
-                onClick={() => onSelectStep(step.id)}
-                className={`flex-1 flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer ${
-                  isCurrent
-                    ? 'bg-blue-50 border border-blue-200 text-[#1D4ED8]'
-                    : isCompleted
-                      ? 'bg-emerald-50/50 border border-emerald-200 text-emerald-900'
-                      : isUnlocked
-                        ? 'bg-white border border-slate-200 hover:bg-slate-50 text-slate-800'
-                        : 'bg-slate-50 border border-slate-200 text-slate-400 opacity-60 cursor-not-allowed'
-                }`}
-              >
-                <span
-                  className={`w-6 h-6 rounded-full text-xs font-mono font-semibold flex items-center justify-center shrink-0 ${
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => onSelectStep(step.id)}
+                  className={`flex-1 flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer ${
                     isCurrent
-                      ? 'bg-[#1D4ED8] text-white'
+                      ? 'bg-blue-50 border border-blue-300 text-[#1D4ED8]'
                       : isCompleted
-                        ? 'bg-[#10B981] text-white'
-                        : 'bg-slate-200 text-slate-700'
+                        ? 'bg-emerald-50/60 border border-emerald-200 text-emerald-900 hover:bg-emerald-50'
+                        : 'bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-800'
                   }`}
                 >
-                  {step.id}
-                </span>
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold truncate">{step.shortLabel}</div>
-                </div>
-              </button>
-            );
-          })}
+                  <span
+                    className={`w-6 h-6 rounded-full text-xs font-mono font-semibold flex items-center justify-center shrink-0 ${
+                      isCurrent
+                        ? 'bg-[#1D4ED8] text-white'
+                        : isCompleted
+                          ? 'bg-[#10B981] text-white'
+                          : 'bg-slate-200 text-slate-700'
+                    }`}
+                  >
+                    {step.id}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold truncate">{step.shortLabel}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

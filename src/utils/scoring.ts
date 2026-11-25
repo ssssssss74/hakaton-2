@@ -4,7 +4,7 @@ import {
   SimulationState,
   TrafficLight,
 } from '../types/simulation';
-import { EVIDENCE_CLUES } from '../data/caseData';
+import { CASE_02_KNIFE_NOTE, EVIDENCE_CLUES } from '../data/caseData';
 
 export function getRankTitle(score: number): RankTitle {
   if (score >= 130) return "O'ta muhim ishlar bo'yicha tergovchi";
@@ -281,6 +281,9 @@ export function buildFallbackCourtChallenge(state: SimulationState): {
   targetPoint: string;
   jpkRef: string;
 } {
+  const hasKnifeNote3DEvidence =
+    state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat');
+
   const redEvents = state.timeline.filter((t) => t.status === 'red');
   if (redEvents.length > 0) {
     const worst = redEvents[0];
@@ -289,6 +292,10 @@ export function buildFallbackCourtChallenge(state: SimulationState): {
       targetPoint: worst.title,
       jpkRef: worst.jpkRef,
     };
+  }
+
+  if (hasKnifeNote3DEvidence) {
+    return CASE_02_KNIFE_NOTE.virtualCourt.advocateChallenge;
   }
 
   if (!state.alibiConfronted) {
@@ -317,6 +324,8 @@ export function evaluateFallbackVerdict(
   judgeReasoning: string;
   improvementAdvice: string;
 } {
+  const hasKnifeNote3DEvidence =
+    state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat');
   const redCount = state.timeline.filter((t) => t.status === 'red').length;
   const ethicsFailed = state.ethicsState.answered && state.ethicsState.lawful === false;
   const criticalCluesPinned = EVIDENCE_CLUES.filter(
@@ -324,7 +333,10 @@ export function evaluateFallbackVerdict(
   ).length;
   const hasGoodDefense = defenseStatement.trim().length >= 35;
 
-  if (ethicsFailed || redCount >= 2 || criticalCluesPinned < 2 || !hasGoodDefense) {
+  if (ethicsFailed || redCount >= 2 || (criticalCluesPinned < 2 && !hasKnifeNote3DEvidence) || !hasGoodDefense) {
+    if (hasKnifeNote3DEvidence) {
+      return CASE_02_KNIFE_NOTE.virtualCourt.verdicts.returned;
+    }
     return {
       verdict: 'returned',
       verdictTitle: 'Ish qayta tergovga qaytarildi (JPK 416 / 419-modda tartibida)',
@@ -333,6 +345,10 @@ export function evaluateFallbackVerdict(
       improvementAdvice:
         "Kelgusi ishlarda har bir raqamli dalilni ekspertiza va rasmiy so'rov bilan mustahkamlang, himoya huquqiga (JPK 48-modda) qat'iy rioya qiling va so'roqda bosim o'tkazishdan saqlaning.",
     };
+  }
+
+  if (hasKnifeNote3DEvidence) {
+    return CASE_02_KNIFE_NOTE.virtualCourt.verdicts.approved;
   }
 
   return {

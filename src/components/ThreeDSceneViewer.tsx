@@ -104,6 +104,7 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
     resetCamera: () => void;
     focusEvidence: (ev: ForensicEvidenceInfo) => void;
     loadGlbFile: (file: File) => void;
+    loadDefaultGlb: () => void;
     restoreDefaultRoom: () => void;
   } | null>(null);
 
@@ -380,64 +381,118 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
       });
     };
 
-    const loadGlbFile = (file: File) => {
-      setModelError(null);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const buffer = reader.result as ArrayBuffer;
-        gltfLoader.parse(
-          buffer,
-          '',
-          (gltf) => {
-            if (activeProcedural) {
-              scene.remove(activeProcedural.root);
-              activeProcedural.dispose();
-              activeProcedural = null;
+    const applyGlbBuffer = (buffer: ArrayBuffer, label: string, isDefaultAsset = false) => {
+      if (buffer.byteLength < 12) {
+        if (!isDefaultAsset) {
+          setModelError("GLB fayl hajmi juda kichik yoki buzilgan.");
+        }
+        return;
+      }
+      const view = new DataView(buffer);
+      const magic = view.getUint32(0, true);
+      if (magic !== 0x46546c67) {
+        if (!isDefaultAsset) {
+          setModelError("Fayl haqiqiy glTF 2.0 (.glb) formatida emas.");
+        }
+        return;
+      }
+
+      gltfLoader.parse(
+        buffer,
+        '',
+        (gltf) => {
+          if (disposed) {
+            disposeObjectTree(gltf.scene);
+            return;
+          }
+          if (activeProcedural) {
+            scene.remove(activeProcedural.root);
+            activeProcedural.dispose();
+            activeProcedural = null;
+          }
+          if (customGltfRoot) {
+            scene.remove(customGltfRoot);
+            disposeObjectTree(customGltfRoot);
+            customGltfRoot = null;
+          }
+
+          const loadedRoot = gltf.scene;
+          const dalilTargets: THREE.Object3D[] = [];
+
+          loadedRoot.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
             }
-            if (customGltfRoot) {
-              scene.remove(customGltfRoot);
-              disposeObjectTree(customGltfRoot);
-              customGltfRoot = null;
+            if (child.name && child.name.startsWith('Dalil_')) {
+              const evidenceId = child.name;
+              child.userData.evidenceId = evidenceId;
+              child.traverse((sub) => {
+                sub.userData.evidenceId = evidenceId;
+              });
+              dalilTargets.push(child);
             }
+          });
 
-            const loadedRoot = gltf.scene;
-            const dalilTargets: THREE.Object3D[] = [];
+          const box = new THREE.Box3().setFromObject(loadedRoot);
+          const size = box.getSize(new THREE.Vector3());
+          const center = box.getCenter(new THREE.Vector3());
 
-            loadedRoot.traverse((child) => {
-              if ((child as THREE.Mesh).isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-              }
-              if (child.name && child.name.startsWith('Dalil_')) {
-                dalilTargets.push(child);
-              }
-            });
-
-            // Compute room bounds from loaded model
-            const box = new THREE.Box3().setFromObject(loadedRoot);
-            const size = box.getSize(new THREE.Vector3());
-            const center = box.getCenter(new THREE.Vector3());
+          if (size.x >= 4 && size.z >= 4) {
+            roomBounds = {
+              minX: box.min.x + 0.55,
+              maxX: box.max.x - 0.55,
+              minZ: box.min.z + 0.55,
+              maxZ: box.max.z - 0.55,
+            };
+          } else {
             roomBounds = {
               minX: box.min.x - 1,
               maxX: box.max.x + 1,
               minZ: box.min.z - 1,
               maxZ: box.max.z + 1,
             };
+          }
 
-            customGltfRoot = loadedRoot;
-            currentInteractables = dalilTargets.length > 0 ? dalilTargets : [loadedRoot];
-            scene.add(loadedRoot);
+          customGltfRoot = loadedRoot;
+          currentInteractables = dalilTargets.length > 0 ? dalilTargets : [loadedRoot];
+          scene.add(loadedRoot);
 
-            camera.position.set(center.x, 1.6, center.z + Math.min(3, Math.max(1.5, size.z * 0.35)));
-            camera.lookAt(center.x, 1.1, center.z);
-            setSelectedEvidence(null);
-            setCustomModelLabel(`${file.name} (${dalilTargets.length} ta Dalil_* topildi)`);
-          },
-          (err) => {
-            console.error('GLB parse error:', err);
+          camera.position.set(center.x, 1.6, center.z + Math.min(2.35, Math.max(1.5, size.z * 0.35)));
+          camera.lookAt(center.x, 0.98, center.z - 0.95);
+          setSelectedEvidence(null);
+          setCustomModelLabel(`${label} (${dalilTargets.length} ta Dalil_* topildi)`);
+          setModelError(null);
+        },
+        (err) => {
+          console.error('GLB parse error:', err);
+          if (!isDefaultAsset) {
             setModelError("GLB faylni o'qib bo'lmadi. Iltimos, to'g'ri .glb yoki .gltf model tanlang.");
           }
-        );
+        }
+      );
+    };
+
+    const loadGlbUrl = async (url: string, label: string, signal?: AbortSignal, isDefaultAsset = false) => {
+      try {
+        const res = await fetch(url, { signal });
+        if (!res.ok) return;
+        const buffer = await res.arrayBuffer();
+        if (signal?.aborted || disposed) return;
+        applyGlbBuffer(buffer, label, isDefaultAsset);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError' && !isDefaultAsset) {
+          setModelError("3D modelni yuklashda xatolik yuz berdi.");
+        }
+      }
+    };
+
+    const loadGlbFile = (file: File) => {
+      setModelError(null);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const buffer = reader.result as ArrayBuffer;
+        applyGlbBuffer(buffer, file.name, false);
       };
       reader.readAsArrayBuffer(file);
     };
@@ -462,6 +517,8 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
         lookAt: new THREE.Vector3(0, 0.98, -0.95),
       };
     };
+
+    const modelAbort = new AbortController();
 
     sceneApiRef.current = {
       lockPointer: () => {
@@ -489,8 +546,14 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
         };
       },
       loadGlbFile,
+      loadDefaultGlb: () => {
+        void loadGlbUrl('/models/xona.glb', 'public/models/xona.glb', undefined, false);
+      },
       restoreDefaultRoom,
     };
+
+    // Auto-load public/models/xona.glb when available
+    void loadGlbUrl('/models/xona.glb', 'public/models/xona.glb', modelAbort.signal, true);
 
     // Pre-warm shaders on real GPUs
     if (!isSoftwareGl) {
@@ -591,6 +654,7 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
 
     return () => {
       disposed = true;
+      modelAbort.abort();
       cancelAnimationFrame(frameId);
       clearTimeout(frameId);
       resizeObserver.disconnect();
@@ -953,12 +1017,21 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
             />
             <button
               type="button"
+              onClick={() => sceneApiRef.current?.loadDefaultGlb()}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-emerald-300 hover:text-emerald-200 text-xs font-medium cursor-pointer"
+              title="public/models/xona.glb modelini yuklash"
+            >
+              <span>xona.glb (3D)</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-medium cursor-pointer"
-              title="Blender xona.glb modelini yuklash"
+              title="Boshqa Blender .glb modelini yuklash"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">xona.glb</span>
+              <span className="hidden md:inline">Yuklash</span>
             </button>
 
             {/* Reset Camera */}

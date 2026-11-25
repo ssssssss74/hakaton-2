@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   FileText,
 } from 'lucide-react';
-import { EVIDENCE_CLUES, PROSECUTOR_CHECKLIST } from '../../data/caseData';
+import { CASE_02_KNIFE_NOTE, EVIDENCE_CLUES, PROSECUTOR_CHECKLIST } from '../../data/caseData';
+import { FORENSIC_EVIDENCE_CATALOG } from '../../scene/evidenceCatalog';
 import { ComputedMetrics, SimulationState } from '../../types/simulation';
 import { OfficialDocumentModal } from '../OfficialDocumentModal';
 
@@ -35,7 +36,15 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
   const [showDocModal, setShowDocModal] = useState(false);
   const { prosecutorReview } = state;
   const pinnedEvidence = EVIDENCE_CLUES.filter((c) => state.pinnedClueIds.includes(c.id));
-  const allChecked = prosecutorReview.checklist.length === PROSECUTOR_CHECKLIST.length;
+  const pinned3DEvidence = Object.values(FORENSIC_EVIDENCE_CATALOG).filter(
+    (ev) => state.pinnedClueIds.includes(ev.id) && !pinnedEvidence.some((p) => p.id === ev.cluePinId)
+  );
+  const isKnifeNoteCase =
+    state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat');
+  const activeChecklist = isKnifeNoteCase
+    ? CASE_02_KNIFE_NOTE.prosecutorChecklist
+    : PROSECUTOR_CHECKLIST;
+  const allChecked = activeChecklist.every((item) => prosecutorReview.checklist.includes(item.id));
 
   return (
     <div className="space-y-6">
@@ -53,9 +62,9 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
 
           <div className="space-y-2">
             <div className="text-xs font-semibold text-slate-600">
-              Ayblov xulosasiga kiritilgan dalillar ({pinnedEvidence.length} ta)
+              Ayblov xulosasiga kiritilgan dalillar ({pinnedEvidence.length + pinned3DEvidence.length} ta)
             </div>
-            {pinnedEvidence.length === 0 ? (
+            {pinnedEvidence.length + pinned3DEvidence.length === 0 ? (
               <div className="text-xs text-[#EF4444] bg-red-50 border border-red-200 rounded-lg p-3">
                 Dalillar doskasida birorta dalil mahkamlanmagan!
               </div>
@@ -72,15 +81,30 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
                     </div>
                   </li>
                 ))}
+                {pinned3DEvidence.map((ev) => (
+                  <li
+                    key={ev.id}
+                    className="text-xs p-3 rounded-lg bg-amber-50/70 border border-amber-200"
+                  >
+                    <div className="font-semibold text-[#0F172A]">
+                      3D Dalil: {ev.title} ({ev.expertiseReport?.reportNumber ?? ev.id})
+                    </div>
+                    <div className="text-slate-600 mt-0.5">
+                      {ev.category} · {ev.jpkRef}
+                    </div>
+                  </li>
+                ))}
               </ul>
             )}
           </div>
 
           <div className="space-y-2.5">
             <div className="text-xs font-semibold text-slate-600">
-              Ayblov xulosasini tasdiqlash nazorat ro‘yxati (JPK 379-modda)
+              {isKnifeNoteCase
+                ? 'Prokuror nazorati ro‘yxati — CASE-02-KNIFE-NOTE (JPK 95¹, 137, 172, 184, 203–204², 384)'
+                : 'Ayblov xulosasini tasdiqlash nazorat ro‘yxati (JPK 379-modda)'}
             </div>
-            {PROSECUTOR_CHECKLIST.map((item) => {
+            {activeChecklist.map((item) => {
               const checked = prosecutorReview.checklist.includes(item.id);
               return (
                 <label

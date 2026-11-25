@@ -296,7 +296,9 @@ export const Layout: React.FC<LayoutProps> = ({
           className={
             state.activeView === 'crime_scene_3d'
               ? 'flex-1 min-w-0 p-3 sm:p-4 lg:p-6 w-full'
-              : 'flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-[1280px] mx-auto w-full'
+              : state.activeView === 'presentation'
+                ? 'flex-1 min-w-0 p-3 sm:p-5 lg:p-6 max-w-[1440px] mx-auto w-full'
+                : 'flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-[1280px] mx-auto w-full'
           }
         >
           {children}

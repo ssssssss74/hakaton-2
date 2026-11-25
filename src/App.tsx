@@ -33,7 +33,8 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved) as SimulationState;
+        return { ...parsed, maxUnlockedStep: 6 };
       }
     } catch (e) {
       console.error('Failed to load state from localStorage', e);
