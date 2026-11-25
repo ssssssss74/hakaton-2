@@ -7,8 +7,9 @@ import {
   Presentation,
   Box,
   ShieldCheck,
+  RotateCcw,
 } from 'lucide-react';
-import { ACTIVE_CASE, STEP_DEFINITIONS } from '../data/caseData';
+import { STEP_DEFINITIONS, resolveActiveCaseMeta } from '../data/caseData';
 import { ComputedMetrics, NavView, SimulationState } from '../types/simulation';
 import { VISUAL_ASSETS } from '../assets/visuals';
 
@@ -17,6 +18,7 @@ interface DashboardViewProps {
   metrics: ComputedMetrics;
   onStartInvestigation: (step?: number) => void;
   onNavigate: (view: NavView) => void;
+  onActivateCase: (caseId: string, navigateToInvestigation?: boolean) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -24,9 +26,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   metrics,
   onStartInvestigation,
   onNavigate,
+  onActivateCase,
 }) => {
   const [heroImgFailed, setHeroImgFailed] = useState(false);
   const [sceneImgFailed, setSceneImgFailed] = useState(false);
+  const activeCase = resolveActiveCaseMeta(state.activeCaseId, state.customCases);
 
   const completedSteps = [
     state.step1Completed,
@@ -97,7 +101,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span aria-hidden="true" className="text-slate-500">·</span>
               <span className="text-slate-300">Virtual tergov laboratoriyasi</span>
               <span aria-hidden="true" className="text-slate-500">·</span>
-              <span className="font-mono text-slate-300 tabular-nums">{ACTIVE_CASE.caseNumber}</span>
+              <span className="font-mono text-slate-300 tabular-nums">{activeCase.caseNumber}</span>
+              {!activeCase.isDefaultCase && (
+                <button
+                  type="button"
+                  onClick={() => onActivateCase('case-168', false)}
+                  className="ml-1 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-[11px] text-amber-200 transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Asosiy kazusga qaytish</span>
+                </button>
+              )}
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
@@ -170,30 +184,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 font-mono tabular-nums">
                 <span className="font-semibold text-[#DC2626]">Shoshilinch 102 xabari</span>
                 <span aria-hidden="true">·</span>
-                <span>Ish: {ACTIVE_CASE.caseNumber}</span>
+                <span>Ish: {activeCase.caseNumber}</span>
                 <span aria-hidden="true">·</span>
                 <span>
-                  {ACTIVE_CASE.receivedDate}, {ACTIVE_CASE.receivedTime}
+                  {activeCase.receivedDate}, {activeCase.receivedTime}
                 </span>
               </div>
               <div className="text-xs font-medium text-slate-500">
-                {ACTIVE_CASE.district}
+                {activeCase.district}
               </div>
             </div>
 
             <div className="space-y-3">
               <h2 className="text-xl font-bold text-[#0F172A] leading-snug">
-                {ACTIVE_CASE.title}
+                {activeCase.title}
               </h2>
               <p className="text-sm text-slate-700 leading-relaxed">
-                {ACTIVE_CASE.summary102}
+                {activeCase.summary102}
               </p>
               <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-4">
                 <div className="text-xs font-semibold text-slate-500">
-                  Jabrlanuvchining 102 operatoriga bergan dastlabki bayonoti
+                  Jabrlanuvchi / murojaat qiluvchining 102 operatoriga bergan dastlabki bayonoti
                 </div>
                 <p className="mt-1.5 text-sm text-slate-800 italic leading-relaxed">
-                  {ACTIVE_CASE.victimStatement}
+                  {activeCase.victimStatement}
                 </p>
               </div>
             </div>
@@ -202,17 +216,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-xs">
             <div>
               <dt className="text-slate-500">Jabrlanuvchi</dt>
-              <dd className="mt-1 font-semibold text-[#0F172A]">Karimov J.B.</dd>
+              <dd className="mt-1 font-semibold text-[#0F172A]">{activeCase.victimName}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Moddiy zarar</dt>
+              <dt className="text-slate-500">Zarar / Ob’ekt</dt>
               <dd className="mt-1 font-mono font-semibold text-[#DC2626] tabular-nums">
-                {ACTIVE_CASE.damageAmount}
+                {activeCase.damageAmount}
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">Dastlabki toifa</dt>
-              <dd className="mt-1 font-semibold text-[#0F172A]">JK 168 / 169-modda</dd>
+              <dd className="mt-1 font-semibold text-[#0F172A]">{activeCase.shortCategory}</dd>
             </div>
             <div>
               <dt className="text-slate-500">Protsessual holat</dt>
@@ -246,7 +260,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               3D Hodisa joyini ko‘zdan kechirish
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              W, A, S, D tugmalari bilan xona bo‘ylab erkin yuring, <span className="font-mono text-amber-200">xona.glb</span> muhitida 5 ta dalilni fonar bilan tekshiring va rasmiy ekspertiza xulosasini oching.
+              W, A, S, D tugmalari bilan xona bo‘ylab erkin yuring, <span className="font-mono text-amber-200">3D xona</span> muhitida 5 ta dalilni fonar bilan tekshiring va rasmiy ekspertiza xulosasini oching.
             </p>
             <button
               type="button"
@@ -353,20 +367,39 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             <div className="divide-y divide-slate-100">
-              {state.customCases.map((c) => (
-                <div key={c.id} className="py-3.5 space-y-1.5">
-                  <div className="flex items-center justify-between gap-2 text-xs text-slate-500 font-mono tabular-nums">
-                    <span className="font-semibold text-[#1D4ED8]">{c.caseNumber}</span>
-                    <span>{c.difficulty}</span>
+              {state.customCases.map((c) => {
+                const isSelectedCase = activeCase.id === c.id;
+                return (
+                  <div key={c.id} className="py-3.5 space-y-2">
+                    <div className="flex items-center justify-between gap-2 text-xs text-slate-500 font-mono tabular-nums">
+                      <span className="font-semibold text-[#1D4ED8]">{c.caseNumber}</span>
+                      <span>{c.difficulty}</span>
+                    </div>
+                    <div className="text-sm font-semibold text-[#0F172A] leading-snug">
+                      {c.title}
+                    </div>
+                    <div className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      {c.summary102}
+                    </div>
+                    <div className="pt-1 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-medium text-slate-500 truncate">
+                        {c.category}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => onActivateCase(c.id, true)}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                          isSelectedCase
+                            ? 'bg-emerald-50 text-[#059669] border border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-blue-50 text-[#1D4ED8] hover:bg-[#1D4ED8] hover:text-white'
+                        }`}
+                      >
+                        <span>{isSelectedCase ? 'Faol — davom etish →' : 'Tergovga olish →'}</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="text-sm font-semibold text-[#0F172A] leading-snug">
-                    {c.title}
-                  </div>
-                  <div className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                    {c.summary102}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

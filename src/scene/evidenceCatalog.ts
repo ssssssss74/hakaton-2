@@ -59,7 +59,7 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
     desc: 'Dastasida noma’lum barmoq izlari va biologik mikrozarralar mavjud. Daktiloskopik + DNK ekspertiza xulosasi № 2026/11-418 tayyor.',
     hash: '4c8a1f9e3d2b7a6c5e8f1a0b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d',
     details: [
-      'Dastada aniq papillyar chiziq izlari aniqlandi (J. Karimov namunasiga mos)',
+      'Dastada aniq papillyar chiziq izlari aniqlandi (B. Raximov namunasiga mos)',
       'Zanglamas po‘lat tig‘, uzunligi 18 sm — biologik izlar qayd etilgan',
       'JPK 172, 180, 203-moddalar asosida muhrlangan paketda saqlanadi',
     ],
@@ -81,12 +81,12 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
       legalBasis: 'O‘zR JPK 68, 172, 173, 180, 184-moddalari',
       warningRef: 'Ekspert bila turib yolg‘on xulosa berganlik uchun O‘zR JK 238-moddasi bo‘yicha jinoiy javobgarlik haqida ogohlantirildi.',
       findings: [
-        'Pichoq dastasining o‘ng yon yuzasidan olingan 2 ta papillyar iz gumonlanuvchi J. Karimovning o‘ng qo‘l bosh va ko‘rsatkich barmoq izlari bilan 14 ta xususiy belgi bo‘yicha to‘liq mos keldi.',
+        'Pichoq dastasining o‘ng yon yuzasidan olingan 2 ta papillyar iz gumonlanuvchi B. Raximovning o‘ng qo‘l bosh va ko‘rsatkich barmoq izlari bilan 14 ta xususiy belgi bo‘yicha to‘liq mos keldi.',
         'Tig‘ va dasta tutashgan yoriq qismida jabrlanuvchi genotipiga mos biologik (qon) izlari hamda gumonlanuvchining epiteliy hujayralari aralashmasi aniqlandi.',
         'Izlarning joylashuv burchagi pichoqdan o‘ng qo‘l bilan zarba berish holatida foydalanilganini ko‘rsatadi.',
       ],
       conclusion:
-        'Ashyoviy dalil — oshxona pichog‘i (Dalil_Pichoq) dastasidagi barmoq izlari gumonlanuvchi J. Karimovga tegishli; ushbu dalil JK 97-modda 1-qismi bo‘yicha ishga JPK 95¹, 184-moddalari talabiga muvofiq maqbul dalil sifatida qo‘shilishi mumkin.',
+        'Ashyoviy dalil — oshxona pichog‘i (Dalil_Pichoq) dastasidagi barmoq izlari gumonlanuvchi B. Raximovga tegishli; ushbu dalil JK 97-modda 1-qismi bo‘yicha ishga JPK 95¹, 184-moddalari talabiga muvofiq maqbul dalil sifatida qo‘shilishi mumkin.',
     },
   },
   Dalil_Xat: {
@@ -123,15 +123,15 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
       findings: [
         'Taqdim etilgan yirtilgan qog‘ozdagi qo‘lyozma matn jabrlanuvchining erkin va eksperimental yozuv namunalari bilan asosiy grafik belgilari (harf bog‘lanishi, qiyalik burchagi, bosim maromi) bo‘yicha mos kelmaydi.',
         'Matnda chap qo‘l yoki ataylab sekinlashtirilgan harakat bilan taqlid (imitatsiya) qilishga xos to‘xtalishlar va g‘ayritabiiy sinish nuqtalari qayd etildi.',
-        'Harflarning mikro-tuzilishi (xususan «a», «m», «r» va raqam yozilishi) gumonlanuvchi J. Karimovning qiyosiy namunalari bilan yuqori ehtimollikda mos keladi.',
+        'Harflarning mikro-tuzilishi (xususan «a», «m», «r» va raqam yozilishi) gumonlanuvchi B. Raximovning qiyosiy namunalari bilan yuqori ehtimollikda mos keladi.',
       ],
       conclusion:
-        '«Soxta xayrlashuv xati» (Dalil_Xat) jabrlanuvchi tomonidan emas, balki boshqa shaxs — yuqori ehtimollik bilan gumonlanuvchi J. Karimov tomonidan qasddan o‘z joniga qasd qilish sahnasini imitatsiya qilish maqsadida yozilgan.',
+        '«Soxta xayrlashuv xati» (Dalil_Xat) jabrlanuvchi tomonidan emas, balki boshqa shaxs — yuqori ehtimollik bilan gumonlanuvchi B. Raximov tomonidan qasddan o‘z joniga qasd qilish sahnasini imitatsiya qilish maqsadida yozilgan.',
     },
   },
   Dalil_Kompyuter: {
     id: 'Dalil_Kompyuter',
-    cluePinId: 'clue-billing',
+    cluePinId: 'clue_billing_tower',
     markerNumber: 3,
     title: 'Ish stoli kompyuteri va Proksi tuguni',
     category: 'Raqamli Dalil №3',
@@ -172,7 +172,7 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
   },
   Dalil_Smartfon: {
     id: 'Dalil_Smartfon',
-    cluePinId: 'clue-telegram',
+    cluePinId: 'clue_phishing_link',
     markerNumber: 4,
     title: 'Gumonlanuvchi Smartfoni',
     category: 'Raqamli Dalil №4',
@@ -213,7 +213,7 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
   },
   Dalil_Seyf: {
     id: 'Dalil_Seyf',
-    cluePinId: 'clue-bank',
+    cluePinId: 'clue_bank_transfer',
     markerNumber: 5,
     title: 'Temir Seyf (Tranzit kartalar)',
     category: 'Ashyoviy Dalil №5',

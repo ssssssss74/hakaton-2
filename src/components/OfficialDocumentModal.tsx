@@ -1,6 +1,7 @@
-import React from 'react';
-import { Printer, Download, X, CheckCircle2, Shield, QrCode } from 'lucide-react';
-import { ACTIVE_CASE } from '../data/caseData';
+import React, { useMemo } from 'react';
+import { Printer, X, CheckCircle2, Shield, QrCode } from 'lucide-react';
+import { EVIDENCE_CLUES, JK_OPTIONS, resolveActiveCaseMeta } from '../data/caseData';
+import { FORENSIC_EVIDENCE_CATALOG } from '../scene/evidenceCatalog';
 import { SimulationState } from '../types/simulation';
 
 interface OfficialDocumentModalProps {
@@ -15,11 +16,46 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
   onClose,
 }) => {
   const isDecision = type === 'decision';
+  const activeCase = resolveActiveCaseMeta(state.activeCaseId, state.customCases);
+  const selectedJkLabel =
+    JK_OPTIONS.find((opt) => opt.value === state.decisionForm.jkArticle)?.label ||
+    activeCase.expectedJkLabel;
+
+  const pinnedEvidenceTitles = useMemo(() => {
+    const titles: string[] = [];
+    for (const id of state.pinnedClueIds) {
+      const clue = EVIDENCE_CLUES.find((c) => c.id === id);
+      if (clue) {
+        titles.push(`${clue.sourceLabel}: ${clue.title}`);
+        continue;
+      }
+      const forensic = FORENSIC_EVIDENCE_CATALOG[id];
+      if (forensic) {
+        titles.push(
+          `${forensic.category}: ${forensic.title}${forensic.expertiseReport ? ` (${forensic.expertiseReport.reportNumber})` : ''}`
+        );
+      }
+    }
+    return titles;
+  }, [state.pinnedClueIds]);
+
+  const eSignatureCode = useMemo(() => {
+    const seed = `${activeCase.caseNumber}-${type}-${state.studentName}`;
+    let hash = 2166136261;
+    for (let i = 0; i < seed.length; i++) {
+      hash ^= seed.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return `ESIGN-${(hash >>> 0).toString(16).toUpperCase().padStart(8, '0')}/HMQA`;
+  }, [activeCase.caseNumber, type, state.studentName]);
+
   const docTitle = isDecision
     ? 'JINOYAT ISHI QO‘ZG‘ATISH VA TERGOVGA QABUL QILISH TO‘G‘RISIDA QAROR'
     : 'JINOYAT ISHI BO‘YICHA AYBLOV XULOSASI';
 
-  const docNumber = isDecision ? 'QAROR № 102/26-04' : 'AYBLOV № 2026/88-A';
+  const docNumber = isDecision
+    ? `QAROR № ${activeCase.caseNumber}`
+    : `AYBLOV № ${activeCase.caseNumber}-A`;
 
   const handlePrint = () => {
     window.print();
@@ -46,7 +82,7 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -74,10 +110,10 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
               O‘zbekiston Respublikasi Huquqni Muhofaza Qilish Akademiyasi
             </div>
             <div className="font-sans text-xs text-slate-600">
-              Toshkent shahri, Chilonzor tumani IIO FMB Tergov bo‘limi
+              {activeCase.district}
             </div>
             <div className="font-mono text-xs text-slate-500 font-semibold pt-1">
-              Ish raqami: {ACTIVE_CASE.caseNumber} · {docNumber}
+              Ish raqami: {activeCase.caseNumber} · {docNumber}
             </div>
           </div>
 
@@ -87,15 +123,15 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
               {docTitle}
             </h1>
             <div className="font-sans text-xs text-slate-500 mt-1">
-              Toshkent shahri, Chilonzor tumani · 19-noyabr 2026-yil
+              {activeCase.district} · {activeCase.receivedDate}
             </div>
           </div>
 
           {/* Opening Paragraph */}
           <p className="text-justify indent-8">
-            HMQA 3-kurs talabasi, tergovchi <strong>{state.studentName}</strong>, 
-            Chilonzor tumani IIO FMB Navbatchilik qismiga 2026-yil 19-noyabr kuni soat 14:42 da kelib tushgan 
-            <strong> {ACTIVE_CASE.caseNumber}</strong>-sonli tergovga qadar tekshiruv materiallarini o‘rganib chiqib,
+            HMQA tinglovchisi, tergovchi <strong>{state.studentName}</strong> ({state.studentGroup}),{' '}
+            {activeCase.district} Navbatchilik qismiga {activeCase.receivedDate} kuni soat {activeCase.receivedTime} da kelib tushgan{' '}
+            <strong>{activeCase.caseNumber}</strong>-sonli «{activeCase.title}» bo‘yicha tergovga qadar tekshiruv materiallarini o‘rganib chiqib,
           </p>
 
           {/* Facts Section */}
@@ -104,16 +140,12 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
               ANIQLADI:
             </div>
             <p className="text-justify indent-8">
-              Fuqaro Dilshod Alisherovich Tursunov (1998-yilda tug‘ilgan) o‘zganing mulkini aldash va ishonchni suiiste’mol qilish yo‘li bilan 
-              qo‘lga kiritish maqsadida, 2026-yil 19-noyabr kuni soat 14:10 da jabrlanuvchi Karimov Jasur Bahromovichga 
-              Telegram messenjeri orqali soxta <em>«milliy-bank-verify[.]uz»</em> fishing havolasini yuborib, 
-              uning bir martalik SMS-tasdiq kodini egallagan.
+              {activeCase.summary102}
             </p>
             <p className="text-justify indent-8">
-              So‘ngra soat 14:15:38 da jabrlanuvchining «TuronPay» hisob raqamidan jami 
-              <strong> 42 500 000 (qirq ikki million besh yuz ming) so‘m</strong> mablag‘ni o‘zining nomidagi 
-              8600 57** **** 9104 tranzit kartasiga o‘tkazib olib, Yunusobod tumani 4-mavzedagi ATM #412 bankomatidan 
-              qisman naqdlashtirgan.
+              Jabrlanuvchi / murojaat qiluvchi tomon: <strong>{activeCase.victimName}</strong>.
+              Gumonlanuvchi shaxs: <strong>{activeCase.suspectName}</strong>.
+              Ish bo‘yicha yetkazilgan zarar / tajovuz ob’ekti: <strong>{activeCase.damageAmount}</strong>.
             </p>
           </div>
 
@@ -124,18 +156,27 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
             </div>
             <ol className="list-decimal pl-8 space-y-2 text-justify">
               <li>
-                Ushbu holat yuzasida O‘zbekiston Respublikasi JK 168-moddasi 3-qismi («b» bandi — axborot texnologiyalaridan foydalanib sodir etilgan firibgarlik) 
-                bilan jinoyat ishi qo‘zg‘atilsin va tergov yurituviga qabul qilinsin.
+                Ushbu holat yuzasidan O‘zbekiston Respublikasi <strong>{selectedJkLabel}</strong> bilan jinoyat ishi qo‘zg‘atilsin va tergov yurituviga qabul qilinsin.
               </li>
               <li>
-                To‘plangan ashyoviy va raqamli dalillar — bank tranzaksiyalari ko‘chirmasi, IMEI 354892104491820 va IP 185.139.137.44 billingi 
-                hamda bankomat videoyozuvlari JPK 81-moddasi tartibida ish materiallariga qo‘shilsin.
+                {pinnedEvidenceTitles.length > 0 ? (
+                  <>
+                    To‘plangan va dalillar doskasiga biriktirilgan ({pinnedEvidenceTitles.length} ta) ashyoviy hamda raqamli dalillar O‘zR JPK 81, 95¹ va 204²-moddalari tartibida ish materiallariga qo‘shilsin:
+                    <ul className="list-disc pl-5 mt-1.5 space-y-1 text-xs font-sans text-slate-800">
+                      {pinnedEvidenceTitles.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  'Ish bo‘yicha to‘plangan barcha ashyoviy va raqamli dalillar JPK 81 va 204²-moddalari tartibida bayonnoma bilan ish materiallariga qo‘shilsin.'
+                )}
               </li>
               <li>
-                D.Tursunovga nisbatan JPK 47-moddasi talablari asosida himoyachi ishtirokida protsessual maqom berilib, tegishli ehtiyot chorasi ko‘rilsin.
+                Gumonlanuvchi <strong>{activeCase.suspectName}</strong>ga nisbatan JPK 47–48-moddalari talablari asosida himoyachi ishtirokida protsessual maqom berilib, tegishli ehtiyot chorasi ko‘rilsin.
               </li>
               <li>
-                Ushbu qaror nusxasi 24 soat ichida qonuniylikni ta’minlash va nazorat yuritish uchun Chilonzor tumani prokuroriga yuborilsin (JPK 331-modda).
+                Ushbu hujjat nusxasi 24 soat ichida qonuniylikni ta’minlash va nazorat yuritish uchun tegishli hudud prokuroriga yuborilsin (JPK 331 / 381-moddalar).
               </li>
             </ol>
           </div>
@@ -145,9 +186,9 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
             <div className="space-y-1 text-center sm:text-left font-sans">
               <div className="text-xs text-slate-500">Tergovchi:</div>
               <div className="font-bold text-slate-900">{state.studentName}</div>
-              <div className="text-xs text-slate-600">HMQA Tergov yo‘nalishi tinglovchisi</div>
+              <div className="text-xs text-slate-600">HMQA Tergov yo‘nalishi tinglovchisi ({state.studentGroup})</div>
               <div className="font-mono text-[11px] text-[#1D4ED8] pt-1">
-                E-Imzo: ESIGN-{Date.now().toString().slice(-8)}/HMQA
+                E-Imzo: {eSignatureCode}
               </div>
             </div>
 

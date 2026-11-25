@@ -1,6 +1,6 @@
 import React from 'react';
 import { Printer, X, ShieldCheck, ShieldAlert } from 'lucide-react';
-import { ACTIVE_CASE, CASE_02_KNIFE_NOTE } from '../data/caseData';
+import { resolveActiveCaseMeta } from '../data/caseData';
 import { FORENSIC_EVIDENCE_CATALOG, SMART_LOCK_PASSPORT } from '../scene/evidenceCatalog';
 import { ComputedMetrics, SimulationState } from '../types/simulation';
 
@@ -40,12 +40,9 @@ export const PrintableProtocolCertificate: React.FC<PrintableProtocolCertificate
   onClose,
 }) => {
   const cleanStudentName = state.studentName.replace(/\s*\(Siz\)\s*/g, '');
-  const isKnifeNoteCase =
-    state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat');
-  const activeCaseNumber = isKnifeNoteCase ? CASE_02_KNIFE_NOTE.caseNumber : ACTIVE_CASE.caseNumber;
-  const activeCaseTitle = isKnifeNoteCase
-    ? `${CASE_02_KNIFE_NOTE.title} (${CASE_02_KNIFE_NOTE.jkArticle})`
-    : ACTIVE_CASE.title;
+  const activeCase = resolveActiveCaseMeta(state.activeCaseId, state.customCases);
+  const activeCaseNumber = activeCase.caseNumber;
+  const activeCaseTitle = `${activeCase.title} (${activeCase.shortCategory})`;
 
   const chainBroken = state.step1ChoiceId === 'informal_call';
   const todayStr = new Date().toLocaleDateString('uz-UZ');

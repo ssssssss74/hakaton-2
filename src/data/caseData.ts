@@ -46,8 +46,8 @@ export const CASES_LIST = [
   {
     id: 'case-104',
     caseNumber: '102-2026/YUN-0912',
-    title: "Qasddan badanga o‘rtacha og‘ir shikayet yetkazish",
-    jkCode: 'JK 104-modda 2-qism (Badanga shikayet)',
+    title: 'Qasddan badanga og‘ir shikast yetkazish',
+    jkCode: 'JK 104-modda 2-qism (Badanga og‘ir shikast)',
     jpkCode: 'JPK 335, 360-moddalar (Tibbiy ekspertiza)',
     difficulty: 'Murakkab',
     active: false,
@@ -66,18 +66,29 @@ export const CASES_LIST = [
 export const CASE_02_KNIFE_NOTE = {
   id: 'CASE-02-KNIFE-NOTE',
   caseNumber: '102-2026/CHIL-0419',
-  title: '«Soxta xayrlashuv xati»',
+  title: '«Soxta xayrlashuv xati» — qasddan odam o‘ldirish va sahnalashtirish',
+  shortCategory: 'Qasddan odam o‘ldirish (O‘zR JK 97-modda 1-qismi)',
   jkArticle: 'O‘zR JK 97-modda 1-qismi',
   jpkArticles: 'JPK 95¹, 137, 172, 173, 180, 203–205, 221, 322, 329-moddalar',
-  suspectName: 'J. Karimov',
+  receivedDate: '25.11.2026',
+  receivedTime: '21:55',
+  district: 'Toshkent shahri, Chilonzor tumani, 47-xonadon',
+  victimName: 'A. Tursunov (marhum, 1989-y.t.)',
+  victimPhone: '+998 90 512-47-00 (yaqin qarindoshi)',
+  suspectName: 'B. Raximov (1991-y.t.)',
+  damageAmount: 'Hayotga tajovuz (JK 97-m)',
+  summary102:
+    'Chilonzor tumanidagi 47-xonadonda fuqaro A. Tursunovning jasadi hamda yonida oshxona pichog‘i (Dalil_Pichoq) va «xayrlashuv xati» (Dalil_Xat) topilgan. Dastlabki ko‘zdan kechirishda o‘z joniga qasd qilish sahnalashtirilgani gumon qilinmoqda; Smart-Lock PIN #4821 (21:14–21:38), GPS/BTS billingi va restoran kassa kamerasi (21:22) tekshirilmoqda.',
+  victimStatement:
+    '«Marhum A. Tursunovning ukasi bergan tushuntirishga ko‘ra, akasining o‘z joniga qasd qilishga hech qanday sababi bo‘lmagan. Voqea kuni soat 21:00 lar atrofida B. Raximov bilan moliyaviy qarz masalasida uchrashishi kerak edi. Xatdagi dastxat akamnikiga o‘xshamaydi, holatni xolis tergov qilishingizni so‘rayman.»',
   alibiClaim:
-    'Gumonlanuvchi J. Karimov soat 21:00 dan 22:00 gacha shahar markazidagi restoranda kechki ovqatda bo‘lganini va hodisa joyiga bormaganini da’vo qilmoqda.',
+    'Gumonlanuvchi B. Raximov soat 21:00 dan 22:00 gacha shahar markazidagi restoranda kechki ovqatda bo‘lganini va hodisa joyiga bormaganini da’vo qilmoqda.',
   alibiContradiction: {
     restaurantCameraTime: '21:22',
     smartLockWindow: '21:14–21:38',
     smartLockPin: '#4821',
     summary:
-      'Restoran kassa kamerasi va to‘lov chekida J. Karimov soat 21:22 da emas, balki uning kartasi boshqa shaxs tomonidan ishlatilgani; Smart-Lock PIN #4821 jurnali va GPS/BTS billingi esa aynan 21:14–21:38 oralig‘ida xonadonga kirib-chiqqanini isbotlaydi.',
+      'Restoran kassa kamerasi va to‘lov chekida B. Raximov soat 21:22 da emas, balki uning kartasi boshqa shaxs tomonidan ishlatilgani; Smart-Lock PIN #4821 jurnali va GPS/BTS billingi esa aynan 21:14–21:38 oralig‘ida xonadonga kirib-chiqqanini isbotlaydi.',
   },
   keyEvidenceIds: [
     'Dalil_Pichoq',
@@ -111,7 +122,7 @@ export const CASE_02_KNIFE_NOTE = {
   virtualCourt: {
     advocateChallenge: {
       advocateArgument:
-        'Hurmatli sud raisi! Tergov organi Smart-Lock PIN #4821 jurnalini gumonlanuvchi J. Karimovga bog‘lamoqda, biroq PIN-kod uchinchi shaxsga ham ma’lum bo‘lishi mumkin — qurilmaning biometrik autentifikatsiyasi mavjud emas! Bundan tashqari, Dalil_Xat bo‘yicha xatshunoslik ekspertizasi namunalari JPK 204² va 95¹-moddalari talablarini buzgan holda olingan. Ushbu dalillarni nomaqbul deb topib, ishni qayta tergovga qaytarishingizni talab qilaman!',
+        'Hurmatli sud raisi! Tergov organi Smart-Lock PIN #4821 jurnalini gumonlanuvchi B. Raximovga bog‘lamoqda, biroq PIN-kod uchinchi shaxsga ham ma’lum bo‘lishi mumkin — qurilmaning biometrik autentifikatsiyasi mavjud emas! Bundan tashqari, Dalil_Xat bo‘yicha xatshunoslik ekspertizasi namunalari JPK 204² va 95¹-moddalari talablarini buzgan holda olingan. Ushbu dalillarni nomaqbul deb topib, ishni qayta tergovga qaytarishingizni talab qilaman!',
       targetPoint: 'Smart-Lock #4821 autentifikatsiyasi va Dalil_Xat namunalari maqbulligi',
       jpkRef: 'JPK 95¹, 184, 204²-moddalar',
     },
@@ -405,6 +416,26 @@ export const JK_OPTIONS = [
     correct: true,
   },
   {
+    value: 'JK_97_1',
+    label: 'JK 97-modda 1-qismi (Qasddan odam o‘ldirish)',
+    correct: false,
+  },
+  {
+    value: 'JK_167_3',
+    label: 'JK 167-modda 3-qismi (O‘zlashtirish yoki rastrata yo‘li bilan talon-toroj qilish)',
+    correct: false,
+  },
+  {
+    value: 'JK_104_2',
+    label: 'JK 104-modda 2-qismi (Qasddan badanga og‘ir shikast yetkazish)',
+    correct: false,
+  },
+  {
+    value: 'JK_210_3',
+    label: 'JK 210-modda 3-qismi (Mansabdor shaxs tomonidan pora olish)',
+    correct: false,
+  },
+  {
     value: 'JK_169_2',
     label: "JK 169-modda 2-qismi (Yashirin talon-toroj — o'g'rilik)",
     correct: false,
@@ -451,6 +482,12 @@ export const QUICK_INTERROGATION_QUESTIONS = [
   "19-noyabr kuni soat 14:00 dan 14:30 gacha qayerda bo'lgansiz va 8600****9104 raqamli bank kartangizdan kim foydalangan?",
   "Sizga tegishli IMEI 354892104491820 qurilmasi soat 14:15 da Yunusobod tumanidagi tayanch stansiyada va IP 185.139.137.44 orqali qayd etilganini qanday izohlaysiz?",
   "Yunusobod 4-mavzedagi ATM #412 bankomatidan soat 14:19 da 15 000 000 so'm yechib olingan holat bo'yicha nima deya olasiz?",
+];
+
+export const CASE_02_INTERROGATION_QUESTIONS = [
+  'Soat 21:22 da restoranda bo‘lganingizni aytdingiz, ammo restoran kassa kamerasi kartangizdan boshqa shaxs foydalanganini ko‘rsatmoqda — buni qanday izohlaysiz?',
+  'Smart-Lock PIN #4821 elektron qulf jurnali sizning 21:14–21:38 oralig‘ida 47-xonadonga kirib-chiqqaningizni qayd etgan. O‘sha vaqtda xonadonda nima qilgansiz?',
+  'Dalil_Pichoq (ekspertiza № 2026/11-418) dastasidagi barmoq izlaringiz va Dalil_Xat (№ 2026/11-419) xatshunoslik xulosasini qanday tushuntirasiz?',
 ];
 
 export const ETHICS_DILEMMA = {
@@ -576,7 +613,7 @@ export const INITIAL_CUSTOM_CASES: CustomCase[] = [
     title: '«Soxta xayrlashuv xati» (Dalil_Pichoq + Dalil_Xat + Smart-Lock #4821)',
     category: 'Qasddan odam o‘ldirish (JK 97-modda 1-qismi)',
     summary102:
-      'Xonadonda oshxona pichog‘i (№ 2026/11-418) va soxta xayrlashuv xati (№ 2026/11-419) topilgan. Smart-Lock PIN #4821 (21:14–21:38), GPS/BTS billingi va restoran kassa kamerasi (21:22) gumonlanuvchi J. Karimovning yolg‘on alibisini fosh etadi.',
+      'Xonadonda oshxona pichog‘i (№ 2026/11-418) va soxta xayrlashuv xati (№ 2026/11-419) topilgan. Smart-Lock PIN #4821 (21:14–21:38), GPS/BTS billingi va restoran kassa kamerasi (21:22) gumonlanuvchi B. Raximovning yolg‘on alibisini fosh etadi.',
     difficulty: 'Murakkab',
     createdAt: '25.11.2026',
   },
@@ -602,8 +639,209 @@ export const INITIAL_CUSTOM_CASES: CustomCase[] = [
   },
 ];
 
-export function createInitialState(): SimulationState {
+export interface ActiveCaseMeta {
+  id: string;
+  caseNumber: string;
+  title: string;
+  shortCategory: string;
+  receivedDate: string;
+  receivedTime: string;
+  district: string;
+  victimName: string;
+  victimPhone: string;
+  suspectName: string;
+  damageAmount: string;
+  summary102: string;
+  victimStatement: string;
+  expectedJkValue: string;
+  expectedJkLabel: string;
+  quickQuestions: string[];
+  introSystemText: string;
+  introSuspectReply: string;
+  isKnifeNote: boolean;
+  isDefaultCase: boolean;
+}
+
+export function resolveActiveCaseMeta(
+  activeCaseId?: string,
+  customCases: CustomCase[] = INITIAL_CUSTOM_CASES
+): ActiveCaseMeta {
+  const id = activeCaseId || 'case-168';
+
+  if (id === 'CASE-02-KNIFE-NOTE') {
+    return {
+      id: CASE_02_KNIFE_NOTE.id,
+      caseNumber: CASE_02_KNIFE_NOTE.caseNumber,
+      title: CASE_02_KNIFE_NOTE.title,
+      shortCategory: CASE_02_KNIFE_NOTE.shortCategory,
+      receivedDate: CASE_02_KNIFE_NOTE.receivedDate,
+      receivedTime: CASE_02_KNIFE_NOTE.receivedTime,
+      district: CASE_02_KNIFE_NOTE.district,
+      victimName: CASE_02_KNIFE_NOTE.victimName,
+      victimPhone: CASE_02_KNIFE_NOTE.victimPhone,
+      suspectName: CASE_02_KNIFE_NOTE.suspectName,
+      damageAmount: CASE_02_KNIFE_NOTE.damageAmount,
+      summary102: CASE_02_KNIFE_NOTE.summary102,
+      victimStatement: CASE_02_KNIFE_NOTE.victimStatement,
+      expectedJkValue: 'JK_97_1',
+      expectedJkLabel: 'JK 97-modda 1-qismi (Qasddan odam o‘ldirish)',
+      quickQuestions: CASE_02_INTERROGATION_QUESTIONS,
+      introSystemText:
+        'So‘roq bayonnomasi ochildi (CASE-02-KNIFE-NOTE). Gumonlanuvchi B. Raximov protsessual huquqlari (JPK 48-modda) bilan tanishtirildi. Qonuniy va faktlarga tayangan savollar bering.',
+      introSuspectReply:
+        'Tergovchi aka, men u kuni soat 21:00 dan 22:00 gacha shahar markazidagi restoranda kechki ovqatda bo‘lganman. 47-xonadonga umuman bormaganman, marhumning o‘limiga hech qanday aloqam yo‘q!',
+      isKnifeNote: true,
+      isDefaultCase: false,
+    };
+  }
+
+  if (id === 'case-104') {
+    return {
+      id: 'case-104',
+      caseNumber: '102-2026/YUN-0912',
+      title: 'Qasddan badanga og‘ir shikast yetkazish',
+      shortCategory: 'JK 104-modda 2-qism (Badanga og‘ir shikast)',
+      receivedDate: '22.11.2026',
+      receivedTime: '23:18',
+      district: 'Toshkent shahri, Yunusobod tumani IIO FMB',
+      victimName: 'N. Sobirov (1992-y.t.)',
+      victimPhone: '+998 93 601-12-40',
+      suspectName: 'Sh. Ergashev (1990-y.t.)',
+      damageAmount: 'Sog‘liqqa og‘ir zarar (JK 104-m)',
+      summary102:
+        'Yunusobod tumani hududidagi tungi kafeda kelib chiqqan janjal oqibatida fuqaro N. Sobirovga o‘tkir tig‘li jism bilan og‘ir tan jarohati yetkazilgani yuzasidan 102 xabari tushgan. Sud-tibbiy ekspertiza va videokuzatuv yozuvlari o‘rganilmoqda.',
+      victimStatement:
+        '«Kafedan chiqishda notanish bo‘lmagan Sh. Ergashev bilan tortishib qoldik. U kutilmaganda menga hujum qilib og‘ir jarohat yetkazdi. Voqeani ko‘rgan guvohlar va tashqi kamera yozuvlari mavjud.»',
+      expectedJkValue: 'JK_104_2',
+      expectedJkLabel: 'JK 104-modda 2-qismi (Qasddan badanga og‘ir shikast yetkazish)',
+      quickQuestions: [
+        '22-noyabr kuni soat 23:00 dan 23:20 gacha Yunusobod tumanidagi kafe hududida bo‘lganmisiz va janjal qanday boshlangan?',
+        'Kafe tashqi videokuzatuv kamerasi hamda guvohlarning ko‘rsatmalarida qayd etilgan holatlarni qanday izohlaysiz?',
+        'Sud-tibbiy ekspertiza xulosasida ko‘rsatilgan jarohat mexanizmi bo‘yicha nima deya olasiz?',
+      ],
+      introSystemText:
+        'So‘roq bayonnomasi ochildi (102-2026/YUN-0912). Gumonlanuvchi Sh. Ergashevga JPK 48-modda huquqlari tushuntirildi.',
+      introSuspectReply:
+        'Men hech kimga qasddan zarar yetkazmoqchi emasdim, janjalni u o‘zi boshladi va men faqat o‘zimni himoya qildim.',
+      isKnifeNote: false,
+      isDefaultCase: false,
+    };
+  }
+
+  if (id === 'case-210') {
+    return {
+      id: 'case-210',
+      caseNumber: '102-2026/MIR-1104',
+      title: 'Mansabdor shaxs tomonidan pora olish (Korrupsiya)',
+      shortCategory: 'JK 210-modda 3-qism (Pora olish)',
+      receivedDate: '23.11.2026',
+      receivedTime: '11:30',
+      district: 'Toshkent shahri, Mirzo Ulug‘bek tumani prokuraturasi',
+      victimName: 'Ariza beruvchi tadbirkor M. Alimov',
+      victimPhone: '+998 97 711-08-55',
+      suspectName: 'O. Qosimov (bo‘lim boshlig‘i)',
+      damageAmount: '12 000 AQSh dollari ekv.',
+      summary102:
+        'Tadbirkor M. Alimovning murojaati asosida o‘tkazilgan tezkor tadbirda bo‘lim boshlig‘i O. Qosimov yer uchastkasi hujjatlarini tezlashtirib berish evaziga maxsus kimyoviy kukun bilan belgilangan mablag‘ni olayotganda ushlangan.',
+      victimStatement:
+        '«Qonuniy ruxsatnomani olish uchun barcha hujjatlarni topshirdim, ammo mansabdor shaxs O. Qosimov hujjatni imzolash evaziga noqonuniy mukofot talab qildi. Shundan so‘ng huquqni muhofaza qiluvchi organlarga ariza berdim.»',
+      expectedJkValue: 'JK_210_3',
+      expectedJkLabel: 'JK 210-modda 3-qismi (Mansabdor shaxs tomonidan pora olish)',
+      quickQuestions: [
+        'Tadbirkor M. Alimov bilan xizmat xonangizda o‘tkazilgan uchrashuv va pul mablag‘lari olingan holatni qanday izohlaysiz?',
+        'Tezkor tadbir bayonnomasida qayd etilgan maxsus kimyoviy belgilangan kupyuralar hamda audioyozuv yuzasidan nima deya olasiz?',
+        'Ruxsatnoma hujjatlarini belgilangan muddatda ko‘rib chiqmasdan to‘xtatib qo‘yganingiz sababi nimada?',
+      ],
+      introSystemText:
+        'So‘roq bayonnomasi ochildi (102-2026/MIR-1104). Gumonlanuvchi O. Qosimovga JPK 48-modda huquqlari tushuntirildi.',
+      introSuspectReply:
+        'Bu mablag‘ pora emas edi, men faqat xizmat maslahati bo‘yicha gaplashganman va konvert ichida nima borligini bilmaganman.',
+      isKnifeNote: false,
+      isDefaultCase: false,
+    };
+  }
+
+  const matchedCustom = customCases.find((c) => c.id === id);
+  if (matchedCustom && matchedCustom.id !== 'case-168') {
+    const catLower = matchedCustom.category.toLowerCase();
+    let expectedJkValue = 'JK_168_3';
+    let expectedJkLabel = "JK 168-modda 3-qismi (Axborot texnologiyalaridan foydalanib ko'p miqdorda firibgarlik)";
+    if (catLower.includes('97')) {
+      expectedJkValue = 'JK_97_1';
+      expectedJkLabel = 'JK 97-modda 1-qismi (Qasddan odam o‘ldirish)';
+    } else if (catLower.includes('167')) {
+      expectedJkValue = 'JK_167_3';
+      expectedJkLabel = 'JK 167-modda 3-qismi (O‘zlashtirish yoki rastrata yo‘li bilan talon-toroj qilish)';
+    } else if (catLower.includes('104')) {
+      expectedJkValue = 'JK_104_2';
+      expectedJkLabel = 'JK 104-modda 2-qismi (Qasddan badanga og‘ir shikast yetkazish)';
+    } else if (catLower.includes('210')) {
+      expectedJkValue = 'JK_210_3';
+      expectedJkLabel = 'JK 210-modda 3-qismi (Mansabdor shaxs tomonidan pora olish)';
+    }
+
+    return {
+      id: matchedCustom.id,
+      caseNumber: matchedCustom.caseNumber,
+      title: matchedCustom.title,
+      shortCategory: matchedCustom.category,
+      receivedDate: matchedCustom.createdAt || '25.11.2026',
+      receivedTime: '10:15',
+      district: 'HMQA O‘quv Poligoni — Maxsus kazus',
+      victimName: 'Jabrlanuvchi / Ariza beruvchi tomon',
+      victimPhone: '+998 90 102-00-01',
+      suspectName: 'Gumonlanuvchi shaxs (ish materiallari bo‘yicha)',
+      damageAmount: 'Ish materiallarida ko‘rsatilgan zarar',
+      summary102: matchedCustom.summary102,
+      victimStatement: `«${matchedCustom.summary102} Ushbu holat bo‘yicha qonuniy chora ko‘rishingizni va barcha raqamli hamda hujjatli dalillarni tekshirishingizni so‘rayman.»`,
+      expectedJkValue,
+      expectedJkLabel,
+      quickQuestions: [
+        `${matchedCustom.caseNumber} raqamli ish bo‘yicha hodisa sodir bo‘lgan vaqtda qayerda bo‘lgansiz va vaziyatni qanday izohlaysiz?`,
+        'Tergov tomonidan to‘plangan elektron loglar, to‘lov hujjatlari va ekspertiza ma’lumotlari yuzasidan nima deya olasiz?',
+        'Jabrlanuvchi tomonning ko‘rsatmalari hamda moliyaviy/hujjatli izlar mos kelishini qanday tushuntirasiz?',
+      ],
+      introSystemText: `So‘roq bayonnomasi ochildi (${matchedCustom.caseNumber} — ${matchedCustom.title}). Gumonlanuvchi JPK 48-modda huquqlari bilan tanishtirildi.`,
+      introSuspectReply:
+        'Tergovchi aka, men o‘zimga qo‘yilayotgan gumonni rad etaman. Barcha hujjatlar va elektron yozuvlar noto‘g‘ri talqin qilinmoqda, himoyachim ishtirokida izoh beraman.',
+      isKnifeNote: false,
+      isDefaultCase: false,
+    };
+  }
+
   return {
+    id: 'case-168',
+    caseNumber: ACTIVE_CASE.caseNumber,
+    title: ACTIVE_CASE.title,
+    shortCategory: ACTIVE_CASE.shortCategory,
+    receivedDate: ACTIVE_CASE.receivedDate,
+    receivedTime: ACTIVE_CASE.receivedTime,
+    district: ACTIVE_CASE.district,
+    victimName: ACTIVE_CASE.victimName,
+    victimPhone: ACTIVE_CASE.victimPhone,
+    suspectName: ACTIVE_CASE.suspectName,
+    damageAmount: ACTIVE_CASE.damageAmount,
+    summary102: ACTIVE_CASE.summary102,
+    victimStatement: ACTIVE_CASE.victimStatement,
+    expectedJkValue: 'JK_168_3',
+    expectedJkLabel: "JK 168-modda 3-qismi (Axborot texnologiyalaridan foydalanib ko'p miqdorda firibgarlik)",
+    quickQuestions: QUICK_INTERROGATION_QUESTIONS,
+    introSystemText:
+      "So'roq bayonnomasi ochildi. Gumonlanuvchi D.Tursunov protsessual huquqlari bilan tanishtirildi. Qonuniy, ochiq savollar bering.",
+    introSuspectReply:
+      "Tergovchi aka, bu yerda qandaydir tushunmovchilik bo'lgan. Men hech kimga bank nomidan xabar yubormaganman. Kartamni bir tanishim vaqtincha so'rab turgandi, pul qaerdan kelganini bilmayman.",
+    isKnifeNote: false,
+    isDefaultCase: true,
+  };
+}
+
+export function createInitialState(
+  activeCaseId = 'case-168',
+  customCases: CustomCase[] = INITIAL_CUSTOM_CASES
+): SimulationState {
+  const meta = resolveActiveCaseMeta(activeCaseId, customCases);
+  return {
+    activeCaseId: meta.id,
     studentName: 'Qodirov Temur (Siz)',
     studentGroup: 'HMQA-302',
     aiEngine: 'gemini',
@@ -634,13 +872,13 @@ export function createInitialState(): SimulationState {
       {
         id: 'intro-sys',
         role: 'system',
-        text: "So'roq bayonnomasi ochildi. Gumonlanuvchi D.Tursunov protsessual huquqlari bilan tanishtirildi. Qonuniy, ochiq savollar bering.",
+        text: meta.introSystemText,
         timestamp: '15:10',
       },
       {
         id: 'intro-suspect',
         role: 'suspect',
-        text: "Tergovchi aka, bu yerda qandaydir tushunmovchilik bo'lgan. Men hech kimga bank nomidan xabar yubormaganman. Kartamni bir tanishim vaqtincha so'rab turgandi, pul qaerdan kelganini bilmayman.",
+        text: meta.introSuspectReply,
         timestamp: '15:11',
       },
     ],
@@ -677,7 +915,7 @@ export function createInitialState(): SimulationState {
     },
     step6Completed: false,
     timeline: [],
-    customCases: INITIAL_CUSTOM_CASES,
+    customCases,
     duelJoined: false,
   };
 }

@@ -138,36 +138,44 @@ export async function speakUzbekText(text: string, onEnd?: () => void) {
     return;
   }
 
-  // 1. Try server-side AI TTS (gemini-3.8-flash-lite-tts) if backend is active
-  try {
-    const res = await fetch('/api/tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
+  // 1. Try server-side AI TTS if online and backend is active
+  if (typeof navigator === 'undefined' || navigator.onLine) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 1600);
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({ text }),
+      });
+      const ct = res.headers.get('content-type') || '';
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.audioBase64) {
-        const audio = new Audio(`data:audio/wav;base64,${data.audioBase64}`);
-        currentAudioElement = audio;
+      if (res.ok && ct.includes('application/json')) {
+        const data = await res.json();
+        if (data.audioBase64) {
+          const audio = new Audio(`data:audio/wav;base64,${data.audioBase64}`);
+          currentAudioElement = audio;
 
-        audio.onended = () => {
-          currentAudioElement = null;
-          if (onEnd) onEnd();
-        };
+          audio.onended = () => {
+            currentAudioElement = null;
+            if (onEnd) onEnd();
+          };
 
-        audio.onerror = () => {
-          currentAudioElement = null;
-          speakWithBrowserSynth(text, onEnd);
-        };
+          audio.onerror = () => {
+            currentAudioElement = null;
+            speakWithBrowserSynth(text, onEnd);
+          };
 
-        await audio.play();
-        return;
+          await audio.play();
+          return;
+        }
       }
+    } catch {
+      // Backend TTS unavailable, fall through immediately to local browser synthesis
+    } finally {
+      window.clearTimeout(timer);
     }
-  } catch {
-    // Backend TTS endpoint unavailable or error, fall through to browser synthesis
   }
 
   // 2. Fallback to client-side browser speech synthesis with Uzbek phonetic cleaning

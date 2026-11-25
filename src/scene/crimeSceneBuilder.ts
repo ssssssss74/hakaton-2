@@ -351,6 +351,11 @@ export function buildProceduralCrimeScene(maxAnisotropy: number): BuiltCrimeScen
   floor.receiveShadow = true;
   root.add(floor);
 
+  // Glowing tactical forensic grid overlay
+  const gridHelper = new THREE.GridHelper(roomW, 16, 0x10b981, 0x064e3b);
+  gridHelper.position.y = 0.006;
+  root.add(gridHelper);
+
   const ceilingMat = new THREE.MeshStandardMaterial({
     color: 0x161d29,
     roughness: 0.9,

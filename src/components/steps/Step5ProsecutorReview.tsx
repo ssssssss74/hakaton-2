@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -40,7 +41,9 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
     (ev) => state.pinnedClueIds.includes(ev.id) && !pinnedEvidence.some((p) => p.id === ev.cluePinId)
   );
   const isKnifeNoteCase =
-    state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat');
+    state.activeCaseId === 'CASE-02-KNIFE-NOTE' ||
+    state.pinnedClueIds.includes('Dalil_Pichoq') ||
+    state.pinnedClueIds.includes('Dalil_Xat');
   const activeChecklist = isKnifeNoteCase
     ? CASE_02_KNIFE_NOTE.prosecutorChecklist
     : PROSECUTOR_CHECKLIST;
@@ -107,53 +110,54 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
             {activeChecklist.map((item) => {
               const checked = prosecutorReview.checklist.includes(item.id);
               return (
-                <label
-                  key={item.id}
-                  className="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs text-slate-800 cursor-pointer"
+                    <label
+                      key={item.id}
+                      className="flex items-start gap-2.5 p-2.5 rounded-xl border border-[#C6D1CC] bg-[#F5F7F6] hover:bg-[#EAF1EE] text-xs text-slate-800 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={prosecutorReview.submitted}
+                        onChange={() => onToggleChecklist(item.id)}
+                        className="mt-0.5 rounded border-slate-300 text-[#0F766E] focus:ring-[#0F766E]"
+                      />
+                      <span>{item.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {!prosecutorReview.submitted && (
+                <motion.button
+                  whileTap={allChecked ? { scale: 0.98 } : undefined}
+                  type="button"
+                  disabled={!allChecked}
+                  onClick={onSubmitToProsecutor}
+                  className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
+                    allChecked
+                      ? 'bg-[#0F766E] hover:bg-[#115E59] text-white cursor-pointer shadow-xs'
+                      : 'bg-[#DCE3E0] text-slate-500 cursor-not-allowed'
+                  }`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    disabled={prosecutorReview.submitted}
-                    onChange={() => onToggleChecklist(item.id)}
-                    className="mt-0.5 rounded border-slate-300 text-[#1D4ED8] focus:ring-[#1D4ED8]"
-                  />
-                  <span>{item.label}</span>
-                </label>
-              );
-            })}
-          </div>
-
-          {!prosecutorReview.submitted && (
-            <button
-              type="button"
-              disabled={!allChecked}
-              onClick={onSubmitToProsecutor}
-              className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
-                allChecked
-                  ? 'bg-[#1D4ED8] hover:bg-blue-800 text-white cursor-pointer'
-                  : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-              }`}
-            >
-              <FileSignature className="w-4 h-4" />
-              <span>Virtual Prokurorga yuborish (JPK 381-modda)</span>
-            </button>
-          )}
-        </div>
-
-        {/* Right: Virtual Prosecutor Audit Output */}
-        <div className="lg:col-span-6 surface-card rounded-2xl p-6 space-y-5">
-          <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[#1D4ED8]" />
-              <h3 className="text-base font-bold text-[#0F172A]">
-                Virtual Prokuror nazorati xulosasi
-              </h3>
+                  <FileSignature className="w-4 h-4" />
+                  <span>Virtual Prokurorga yuborish (JPK 381-modda)</span>
+                </motion.button>
+              )}
             </div>
-            <span className="text-xs font-mono tabular-nums text-slate-500">
-              1–4 bosqichlar auditi
-            </span>
-          </div>
+
+            {/* Right: Virtual Prosecutor Audit Output */}
+            <div className="lg:col-span-6 surface-card rounded-2xl p-6 space-y-5">
+              <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#CFD8D4]">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-teal-800" />
+                  <h3 className="text-base font-bold text-slate-900">
+                    Virtual Prokuror nazorati xulosasi
+                  </h3>
+                </div>
+                <span className="text-xs font-mono tabular-nums text-slate-600">
+                  1–4 bosqichlar auditi
+                </span>
+              </div>
 
           {!prosecutorReview.submitted ? (
             <div className="py-10 text-center space-y-2 text-slate-500">
@@ -167,7 +171,12 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-4"
+            >
               {/* Verdict Header */}
               <div
                 className={`p-4 rounded-xl border flex items-start gap-3 ${
@@ -236,56 +245,61 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
               !prosecutorReview.remediated &&
               !prosecutorReview.proceededWithRisk ? (
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={onRemediateIssues}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#0F172A] hover:bg-slate-800 rounded-lg cursor-pointer"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#134E4A] hover:bg-[#0F3F3C] rounded-xl cursor-pointer shadow-xs"
                   >
                     <Wrench className="w-4 h-4" />
                     <span>Kamchiliklarni tuzatish (+4 soat)</span>
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={onProceedWithRisk}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-[#EF4444] bg-white border border-red-300 hover:bg-red-50 rounded-lg cursor-pointer"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-red-700 bg-[#F5F7F6] border border-red-300 hover:bg-red-50 rounded-xl cursor-pointer"
                   >
                     <span>Tavakkal bilan sudga yuborish</span>
-                  </button>
+                  </motion.button>
                 </div>
               ) : (
                 <div className="pt-2 space-y-3">
                   {prosecutorReview.remediated && (
-                    <div className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                    <div className="text-xs text-teal-900 bg-[#DCF0E7] border border-teal-500/50 rounded-xl p-3">
                       Qo‘shimcha protsessual bayonnoma tuzildi (+4 soat). Kamchiliklar qisman bartaraf etilib, ish sudga yo‘naltirildi.
                     </div>
                   )}
 
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={() => setShowDocModal(true)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-slate-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-lg transition-colors cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-slate-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-xl transition-colors cursor-pointer"
                   >
-                    <FileText className="w-4 h-4 text-[#D97706]" />
+                    <FileText className="w-4 h-4 text-amber-700" />
                     <span>Rasmiy Ayblov xulosasi blankasi (Gerbli PDF)</span>
-                  </button>
+                  </motion.button>
 
-                  <button
+                  <motion.button
+                    whileHover={{ x: 2 }}
+                    whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={onNextStep}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#1D4ED8] hover:bg-blue-800 rounded-lg cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#0F766E] hover:bg-[#115E59] rounded-xl cursor-pointer shadow-xs"
                   >
                     <span>6-bosqich: Virtual Sud Majlisi</span>
                     <ArrowRight className="w-4 h-4" />
-                  </button>
+                  </motion.button>
                 </div>
               )}
 
               {/* Mini Summary Metrics */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono tabular-nums">
+              <div className="pt-3 border-t border-[#CFD8D4] flex items-center justify-between text-xs text-slate-600 font-mono tabular-nums">
                 <span>Qolgan muddat: {metrics.hoursRemaining} soat</span>
                 <span>Joriy ball: {metrics.totalScore}</span>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { ComputedMetrics, NavView, SimulationState } from '../types/simulation';
+import { PWAInstallButton, OfflineIndicator } from './PWAInstallButton';
 
 interface LayoutProps {
   state: SimulationState;
@@ -79,10 +80,10 @@ export const Layout: React.FC<LayoutProps> = ({
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
 
   const timerColor = metrics.isOverdue
-    ? 'text-red-400'
+    ? 'text-red-700'
     : metrics.hoursRemaining <= 20
-      ? 'text-amber-400'
-      : 'text-emerald-400';
+      ? 'text-amber-700'
+      : 'text-teal-800';
 
   const hoursPercent = Math.max(
     0,
@@ -104,19 +105,19 @@ export const Layout: React.FC<LayoutProps> = ({
   };
 
   const TELEMETRY_NODES = [
-    { label: 'E-Tergov API: Faol', tone: 'bg-emerald-400' },
-    { label: 'IIV Daktilo-Baza: Ulangan', tone: 'bg-emerald-400' },
-    { label: 'Markaziy Bank Antifrod: Sinxron', tone: 'bg-cyan-400' },
-    { label: 'Lex.uz JK/JPK: 2026', tone: 'bg-emerald-400' },
+    { label: 'E-Tergov API: Faol', tone: 'bg-teal-600' },
+    { label: 'IIV Daktilo-Baza: Ulangan', tone: 'bg-emerald-600' },
+    { label: 'Markaziy Bank Antifrod: Sinxron', tone: 'bg-cyan-700' },
+    { label: 'Lex.uz JK/JPK: 2026', tone: 'bg-teal-600' },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col text-slate-100 overflow-x-hidden">
-      {/* Cyber-Forensics Neon Top Accent Bar */}
-      <div className="h-[2px] w-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-blue-500 shrink-0 no-print" />
+    <div className="min-h-screen flex flex-col text-slate-800 overflow-x-hidden bg-[#E3E7E5]">
+      {/* Calm Teal-Sage Top Accent Bar */}
+      <div className="h-[2px] w-full bg-gradient-to-r from-teal-700 via-emerald-600 to-slate-500 shrink-0 no-print" />
 
-      {/* Persistent Cyber-Forensics Command Center Header */}
-      <header className="no-print sticky top-0 z-30 bg-[#070E1C]/92 backdrop-blur-md text-slate-100 border-b border-cyan-500/20 shadow-lg shadow-slate-950/50">
+      {/* Soft Matte Neutral-Gray Header */}
+      <header className="no-print sticky top-0 z-30 bg-[#ECEFEB]/95 backdrop-blur-md text-slate-800 border-b border-[#C6D1CC] shadow-xs">
         {/* Top Row: Brand + Operational Controls */}
         <div className="min-h-[60px] px-3 sm:px-4 lg:px-6 flex items-center justify-between gap-3">
           {/* Left: Brand Wordmark */}
@@ -124,7 +125,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <button
               type="button"
               onClick={() => setMobileNavOpen(!mobileNavOpen)}
-              className="lg:hidden p-2 rounded-lg text-slate-200 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer"
+              className="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-[#DFE6E3] hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 cursor-pointer"
               aria-label="Menyuni ochish"
             >
               {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -134,14 +135,14 @@ export const Layout: React.FC<LayoutProps> = ({
               onClick={() => handleSelectNav('dashboard')}
               className="flex items-center gap-3 text-left whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none group"
             >
-              <span className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500/25 via-blue-600/40 to-emerald-500/25 border border-cyan-400/45 flex items-center justify-center shrink-0 shadow-sm group-hover:border-emerald-400 transition-colors">
-                <Shield className="w-4 h-4 text-cyan-300" />
+              <span className="w-9 h-9 rounded-lg bg-[#DCE7E3] border border-[#AFC6BE] flex items-center justify-center shrink-0 shadow-xs group-hover:border-teal-700 transition-colors">
+                <Shield className="w-4 h-4 text-teal-800" />
               </span>
               <div className="leading-tight">
-                <div className="text-sm sm:text-base font-bold tracking-tight text-slate-100">
+                <div className="text-sm sm:text-base font-bold tracking-tight text-slate-900">
                   E-Tergov Lab · HMQA
                 </div>
-                <div className="text-[10px] font-mono text-cyan-300/90 hidden sm:block">
+                <div className="text-[10px] font-mono text-teal-800 hidden sm:block">
                   Kiber-Kriminalistika Boshqaruv Markazi
                 </div>
               </div>
@@ -149,27 +150,27 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
 
           {/* Right: Operational Telemetry & Controls */}
-          <div className="flex items-center gap-3 lg:gap-4 shrink-0">
+          <div className="flex items-center gap-2.5 lg:gap-3.5 shrink-0">
             {/* Procedural Timer */}
-            <div className="hidden sm:flex items-center gap-2.5 text-xs border-r border-slate-800 pr-3 lg:pr-4">
+            <div className="hidden sm:flex items-center gap-2.5 text-xs border-r border-[#C6D1CC] pr-3 lg:pr-4">
               <Clock className={`w-4 h-4 shrink-0 ${timerColor}`} />
               <div className="leading-tight space-y-1">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-slate-300 whitespace-nowrap">Protsessual muddat</span>
+                  <span className="text-slate-600 whitespace-nowrap">Protsessual muddat</span>
                   <span className={`font-mono font-semibold tabular-nums whitespace-nowrap ${timerColor}`}>
                     {metrics.isOverdue
                       ? `+${Math.abs(metrics.hoursRemaining)} soat o‘tdi`
                       : `${metrics.hoursRemaining}/${state.totalHoursBudget} soat`}
                   </span>
                 </div>
-                <div className="h-1.5 w-32 bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-1.5 w-32 bg-[#D3DBD7] rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
                       metrics.isOverdue
-                        ? 'bg-red-500'
+                        ? 'bg-red-600'
                         : metrics.hoursRemaining <= 20
-                          ? 'bg-amber-400'
-                          : 'bg-emerald-400'
+                          ? 'bg-amber-600'
+                          : 'bg-teal-700'
                     }`}
                     style={{ width: `${metrics.isOverdue ? 100 : hoursPercent}%` }}
                   />
@@ -178,26 +179,29 @@ export const Layout: React.FC<LayoutProps> = ({
             </div>
 
             {/* Student Rank + Score */}
-            <div className="hidden md:flex items-center gap-2.5 text-xs border-r border-slate-800 pr-3 lg:pr-4">
-              <Award className="w-4 h-4 text-amber-400 shrink-0" />
+            <div className="hidden md:flex items-center gap-2.5 text-xs border-r border-[#C6D1CC] pr-3 lg:pr-4">
+              <Award className="w-4 h-4 text-amber-700 shrink-0" />
               <div className="leading-tight">
-                <div className="text-amber-300 font-semibold whitespace-nowrap">
+                <div className="text-amber-800 font-semibold whitespace-nowrap">
                   {metrics.rankTitle}
                 </div>
-                <div className="text-slate-200 font-mono tabular-nums whitespace-nowrap">
+                <div className="text-slate-600 font-mono tabular-nums whitespace-nowrap">
                   Ball: {metrics.totalScore} · Etika: {state.ethicsIndex}%
                 </div>
               </div>
             </div>
 
+            {/* In-App PWA Local Install Button */}
+            <PWAInstallButton />
+
             {/* Presentation Tablet Button */}
             <button
               type="button"
               onClick={() => handleSelectNav('presentation')}
-              className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+              className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 shadow-xs ${
                 state.activeView === 'presentation'
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 border border-amber-300 shadow-md shadow-amber-500/20'
-                  : 'text-amber-200 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40'
+                  ? 'bg-[#0F766E] text-white border border-teal-800 shadow-sm'
+                  : 'text-teal-900 bg-[#DCE7E3] hover:bg-[#CEE0DA] border border-[#AFC6BE]'
               }`}
             >
               <Presentation className="w-3.5 h-3.5 shrink-0" />
@@ -209,7 +213,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <button
               type="button"
               onClick={() => setConfirmResetOpen(true)}
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/25 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:text-slate-950 bg-[#F2F4F3] hover:bg-[#E4E9E7] border border-[#C6D1CC] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden xl:inline">Qayta boshlash</span>
@@ -218,31 +222,31 @@ export const Layout: React.FC<LayoutProps> = ({
         </div>
 
         {/* Live Simulator Telemetry Strip */}
-        <div className="bg-[#050A14]/90 border-t border-cyan-500/15 px-3 sm:px-4 lg:px-6 py-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono">
+        <div className="bg-[#E1E7E4] border-t border-[#C6D1CC] px-3 sm:px-4 lg:px-6 py-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-700">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             {TELEMETRY_NODES.map((node) => (
-              <span key={node.label} className="inline-flex items-center gap-1.5 text-slate-200 whitespace-nowrap">
+              <span key={node.label} className="inline-flex items-center gap-1.5 whitespace-nowrap">
                 <span className="relative flex h-2 w-2 shrink-0">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${node.tone} opacity-75`} />
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${node.tone} opacity-60`} />
                   <span className={`relative inline-flex rounded-full h-2 w-2 ${node.tone}`} />
                 </span>
                 <span>{node.label}</span>
               </span>
             ))}
           </div>
-          <span className="text-cyan-300 hidden xl:inline whitespace-nowrap">
-            HMQA «Kiberxavfsizlikni huquqiy ta’minlash» · Jonli himoya tizimi
+          <span className="text-teal-900 hidden xl:inline whitespace-nowrap font-semibold">
+            HMQA «Kiberxavfsizlikni huquqiy ta’minlash» · Lokal & Bulutli himoya tizimi
           </span>
         </div>
       </header>
 
       <div className="flex flex-1 min-h-0">
-        {/* Executive Left Sidebar Navigation (Desktop) */}
-        <aside className="no-print hidden lg:flex w-64 shrink-0 flex-col bg-[#0A1324]/95 backdrop-blur-md text-slate-200 border-r border-cyan-500/20">
+        {/* Soft Matte Gray Sidebar Navigation (Desktop) */}
+        <aside className="no-print hidden lg:flex w-64 shrink-0 flex-col bg-[#ECEFEB] border-r border-[#C6D1CC]">
           {/* Cadet Identity Card */}
-          <div className="p-4 border-b border-cyan-500/15 bg-[#070E1C]/80">
+          <div className="p-4 border-b border-[#D0D9D5] bg-[#E4EAE7]">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-display font-bold text-xs text-amber-300 shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-[#D3E2DC] border border-[#A8C2B8] flex items-center justify-center font-display font-bold text-xs text-teal-900 shrink-0">
                 {state.studentName
                   .split(' ')
                   .map((p) => p[0])
@@ -250,10 +254,10 @@ export const Layout: React.FC<LayoutProps> = ({
                   .join('')}
               </div>
               <div className="min-w-0">
-                <div className="text-sm font-semibold text-slate-100 truncate">
+                <div className="text-sm font-semibold text-slate-900 truncate">
                   {state.studentName}
                 </div>
-                <div className="text-[11px] text-slate-300 font-mono tabular-nums truncate">
+                <div className="text-[11px] text-slate-600 font-mono tabular-nums truncate">
                   {state.studentGroup} · {state.currentStep}/6-bosqich
                 </div>
               </div>
@@ -272,17 +276,17 @@ export const Layout: React.FC<LayoutProps> = ({
                   onClick={() => handleSelectNav(item.id)}
                   className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all cursor-pointer border ${
                     isActive
-                      ? 'bg-gradient-to-r from-[#1D4ED8] to-cyan-700/90 border-cyan-400/50 text-white shadow-md shadow-cyan-950/50'
-                      : 'border-transparent text-slate-200 hover:bg-slate-800/70 hover:border-cyan-500/20 hover:text-white'
+                      ? 'bg-[#0F766E] border-teal-800 text-white shadow-xs'
+                      : 'border-transparent text-slate-700 hover:bg-[#DFE6E3] hover:text-slate-950'
                   }`}
                 >
                   <Icon
                     className={`w-4 h-4 shrink-0 transition-colors ${
                       isActive
-                        ? 'text-cyan-200'
+                        ? 'text-teal-100'
                         : item.id === 'presentation'
-                          ? 'text-amber-400'
-                          : 'text-slate-300 group-hover:text-cyan-300'
+                          ? 'text-amber-700'
+                          : 'text-slate-500 group-hover:text-teal-800'
                     }`}
                   />
                   <div className="min-w-0 flex-1">
@@ -291,40 +295,40 @@ export const Layout: React.FC<LayoutProps> = ({
                     </div>
                     <div
                       className={`text-[11px] truncate ${
-                        isActive ? 'text-cyan-100' : 'text-slate-300'
+                        isActive ? 'text-teal-100/90' : 'text-slate-500'
                       }`}
                     >
                       {item.sublabel}
                     </div>
                   </div>
-                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-cyan-200 shrink-0" />}
+                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-teal-100 shrink-0" />}
                 </button>
               );
             })}
           </nav>
 
           {/* Compact Case Progress Summary */}
-          <div className="p-4 border-t border-cyan-500/15 bg-[#070E1C]/80 text-xs space-y-3">
+          <div className="p-4 border-t border-[#D0D9D5] bg-[#E4EAE7] text-xs space-y-3">
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-slate-200">
+              <div className="flex items-center justify-between text-slate-700">
                 <span>Protsessual aniqlik</span>
-                <span className="font-mono font-semibold tabular-nums text-cyan-300">
+                <span className="font-mono font-semibold tabular-nums text-teal-800">
                   {metrics.proceduralAccuracy}%
                 </span>
               </div>
-              <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-[#CED7D3] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-teal-700 to-emerald-600 transition-all duration-300"
                   style={{ width: `${metrics.proceduralAccuracy}%` }}
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-slate-300 font-mono tabular-nums pt-1 border-t border-slate-800/80">
+            <div className="flex items-center justify-between text-[11px] text-slate-600 font-mono tabular-nums pt-1 border-t border-[#CBD5D0]">
               <span>Yakunlandi</span>
-              <span className="text-slate-100">{completedStepsCount} / 6 bosqich</span>
+              <span className="text-slate-900 font-semibold">{completedStepsCount} / 6 bosqich</span>
             </div>
-            <div className="text-[11px] text-slate-300 leading-snug">
+            <div className="text-[11px] text-slate-600 leading-snug">
               Huquqni muhofaza qilish akademiyasi
             </div>
           </div>
@@ -334,23 +338,23 @@ export const Layout: React.FC<LayoutProps> = ({
         {mobileNavOpen && (
           <div className="fixed inset-0 z-40 lg:hidden flex">
             <div
-              className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs"
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
               onClick={() => setMobileNavOpen(false)}
             />
-            <aside className="relative z-50 w-72 max-w-[85vw] bg-[#0E172A] text-slate-100 flex flex-col h-full border-r border-slate-800">
-              <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+            <aside className="relative z-50 w-72 max-w-[85vw] bg-[#ECEFEB] text-slate-900 flex flex-col h-full border-r border-[#C6D1CC]">
+              <div className="p-4 border-b border-[#D0D9D5] flex items-center justify-between bg-[#E4EAE7]">
                 <span className="font-semibold text-sm">Navigatsiya</span>
                 <button
                   type="button"
                   onClick={() => setMobileNavOpen(false)}
-                  className="p-1.5 rounded text-slate-300 hover:bg-slate-800 cursor-pointer"
+                  className="p-1.5 rounded text-slate-700 hover:bg-[#D5DFDB] cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="p-4 border-b border-slate-800 text-xs space-y-1 bg-[#0B1221]/60">
-                <div className="font-semibold text-amber-300">{metrics.rankTitle}</div>
-                <div className="font-mono text-slate-300 tabular-nums">
+              <div className="p-4 border-b border-[#D0D9D5] text-xs space-y-1 bg-[#E7ECEA]">
+                <div className="font-semibold text-amber-800">{metrics.rankTitle}</div>
+                <div className="font-mono text-slate-600 tabular-nums">
                   Ball: {metrics.totalScore} · Qoldi: {metrics.hoursRemaining} soat
                 </div>
               </div>
@@ -365,14 +369,16 @@ export const Layout: React.FC<LayoutProps> = ({
                       onClick={() => handleSelectNav(item.id)}
                       className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left cursor-pointer ${
                         isActive
-                          ? 'bg-[#1D4ED8] text-white'
-                          : 'text-slate-300 hover:bg-slate-800'
+                          ? 'bg-[#0F766E] text-white'
+                          : 'text-slate-700 hover:bg-[#DFE6E3]'
                       }`}
                     >
                       <Icon className="w-4 h-4 shrink-0" />
                       <div>
                         <div className="text-sm font-medium">{item.label}</div>
-                        <div className="text-xs text-slate-400">{item.sublabel}</div>
+                        <div className={`text-xs ${isActive ? 'text-teal-100' : 'text-slate-500'}`}>
+                          {item.sublabel}
+                        </div>
                       </div>
                     </button>
                   );
@@ -396,11 +402,14 @@ export const Layout: React.FC<LayoutProps> = ({
         </main>
       </div>
 
+      {/* Offline Connectivity Indicator */}
+      <OfflineIndicator />
+
       {/* Reset Demo Confirmation Modal */}
       {confirmResetOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E2E8F0] rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-[#0F172A]">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#F2F4F3] border border-[#C6D1CC] rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-slate-900">
               Simulyatsiyani qayta boshlaysizmi?
             </h3>
             <p className="mt-2 text-sm text-slate-600 leading-relaxed">
@@ -412,7 +421,7 @@ export const Layout: React.FC<LayoutProps> = ({
               <button
                 type="button"
                 onClick={() => setConfirmResetOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#E2E8F0] rounded-lg hover:bg-slate-50 cursor-pointer"
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-[#E6EAE8] border border-[#C6D1CC] rounded-lg hover:bg-[#DAE1DE] cursor-pointer"
               >
                 Bekor qilish
               </button>
@@ -422,7 +431,7 @@ export const Layout: React.FC<LayoutProps> = ({
                   onResetDemo();
                   setConfirmResetOpen(false);
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-[#DC2626] hover:bg-red-700 rounded-lg cursor-pointer"
+                className="px-4 py-2 text-sm font-medium text-white bg-red-700 hover:bg-red-800 rounded-lg cursor-pointer"
               >
                 Ha, qayta boshlash
               </button>

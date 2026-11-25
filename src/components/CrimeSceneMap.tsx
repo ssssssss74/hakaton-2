@@ -64,7 +64,7 @@ const HOTSPOTS: CrimeSceneHotspot[] = [
       details: [
         'SMS xabarnomalarida bank tasdiqlash kodlari mavjud',
         'Telegram guruhlarida phishing havolalar tarqatilgan',
-        'Voqea vaqtida Sergeli tayanch stansiyasiga ulangani aniqlandi',
+        'Voqea vaqtida Yunusobod BS-TSH-104 tayanch stansiyasiga ulangani aniqlandi',
       ],
     },
   },
@@ -75,7 +75,7 @@ const HOTSPOTS: CrimeSceneHotspot[] = [
     jpkRef: 'JPK 104-modda',
     coordinates: { x: 50, y: 72 },
     icon: <CreditCard className="w-5 h-5 text-emerald-400" />,
-    description: 'Jabrlanuvchi M.Karimov hisobidan yechilgan 42 500 000 so‘m o‘tkazilgan 8600****9104 kartasi.',
+    description: 'Jabrlanuvchi J.Karimov hisobidan yechilgan 42 500 000 so‘m o‘tkazilgan 8600****9104 kartasi.',
     forensicData: {
       hash: '1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f',
       seizedBy: 'Iqtisodiy jinoyatlar bo‘limi',

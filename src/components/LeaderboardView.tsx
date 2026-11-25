@@ -242,6 +242,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
       {duelModalOpen && (
         <CadetDuelModal
           state={state}
+          metrics={metrics}
           onClose={() => setDuelModalOpen(false)}
           onRecordVictory={() => {
             if (onRecordDuelVictory) {

@@ -50,13 +50,20 @@ export function computeMetrics(state: SimulationState): ComputedMetrics {
   );
 
   const criticalClues = EVIDENCE_CLUES.filter((c) => c.isCritical);
+  const distractorClues = EVIDENCE_CLUES.filter((c) => !c.isCritical);
+  const forensicBonusIds = ['Dalil_Pichoq', 'Dalil_Xat'];
+
   const pinnedCriticalCount = criticalClues.filter((c) =>
     state.pinnedClueIds.includes(c.id)
   ).length;
-  const pinnedDistractorCount = state.pinnedClueIds.filter(
-    (id) => !criticalClues.some((c) => c.id === id)
+  const pinnedForensicBonusCount = forensicBonusIds.filter((id) =>
+    state.pinnedClueIds.includes(id)
+  ).length;
+  const pinnedDistractorCount = distractorClues.filter((c) =>
+    state.pinnedClueIds.includes(c.id)
   ).length;
 
+  const effectiveCriticalCount = Math.min(3, pinnedCriticalCount + pinnedForensicBonusCount);
   const requestBonus = Math.min(3, state.sentRequestIds.length) * 10;
   const alibiBonus = state.alibiConfronted ? 10 : 0;
   const evidenceStrength = Math.max(
@@ -64,7 +71,7 @@ export function computeMetrics(state: SimulationState): ComputedMetrics {
     Math.min(
       100,
       Math.round(
-        (pinnedCriticalCount / 3) * 65 +
+        (effectiveCriticalCount / 3) * 65 +
           requestBonus +
           alibiBonus -
           pinnedDistractorCount * 8 +
@@ -302,7 +309,9 @@ export function buildFallbackCourtChallenge(state: SimulationState): {
   jpkRef: string;
 } {
   const hasKnifeNote3DEvidence =
-    state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat');
+    state.activeCaseId === 'CASE-02-KNIFE-NOTE' ||
+    state.pinnedClueIds.includes('Dalil_Pichoq') ||
+    state.pinnedClueIds.includes('Dalil_Xat');
 
   const redEvents = state.timeline.filter((t) => t.status === 'red');
   if (redEvents.length > 0) {
@@ -345,15 +354,18 @@ export function evaluateFallbackVerdict(
   improvementAdvice: string;
 } {
   const hasKnifeNote3DEvidence =
-    state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat');
+    state.activeCaseId === 'CASE-02-KNIFE-NOTE' ||
+    state.pinnedClueIds.includes('Dalil_Pichoq') ||
+    state.pinnedClueIds.includes('Dalil_Xat');
+  const forensicBonusIds = ['Dalil_Pichoq', 'Dalil_Xat'];
   const redCount = state.timeline.filter((t) => t.status === 'red').length;
   const ethicsFailed = state.ethicsState.answered && state.ethicsState.lawful === false;
-  const criticalCluesPinned = EVIDENCE_CLUES.filter(
-    (c) => c.isCritical && state.pinnedClueIds.includes(c.id)
-  ).length;
+  const criticalCluesPinned =
+    EVIDENCE_CLUES.filter((c) => c.isCritical && state.pinnedClueIds.includes(c.id)).length +
+    forensicBonusIds.filter((id) => state.pinnedClueIds.includes(id)).length;
   const hasGoodDefense = defenseStatement.trim().length >= 35;
 
-  if (ethicsFailed || redCount >= 2 || (criticalCluesPinned < 2 && !hasKnifeNote3DEvidence) || !hasGoodDefense) {
+  if (ethicsFailed || redCount >= 2 || criticalCluesPinned < 2 || !hasGoodDefense) {
     if (hasKnifeNote3DEvidence) {
       return CASE_02_KNIFE_NOTE.virtualCourt.verdicts.returned;
     }

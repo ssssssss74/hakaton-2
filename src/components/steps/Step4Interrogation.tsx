@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   Send,
   AlertTriangle,
@@ -14,10 +15,12 @@ import {
   VolumeX,
   Info,
   Wand2,
+  Copy,
+  Check,
 } from 'lucide-react';
 import {
   ETHICS_DILEMMA,
-  QUICK_INTERROGATION_QUESTIONS,
+  resolveActiveCaseMeta,
 } from '../../data/caseData';
 import { SimulationState } from '../../types/simulation';
 import { speakUzbekText, stopSpeaking } from '../../utils/audioEffects';
@@ -49,8 +52,10 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
   const [showVoiceInfo, setShowVoiceInfo] = useState(false);
   const [activeSpeakingId, setActiveSpeakingId] = useState<string | null>(null);
   const [demoSampleIdx, setDemoSampleIdx] = useState(0);
+  const [copiedTranscript, setCopiedTranscript] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const activeCase = resolveActiveCaseMeta(state.activeCaseId, state.customCases);
 
   const DEMO_INTERROGATION_SAMPLES = [
     'Soat 14:15 da IP 185.139.137.44, @orion_verify_bot va IMEI 354892104491820 Yunusobod BS-TSH-104 stansiyasida qayd etilganini hamda ATM #412 kamerasini qanday izohlaysiz?',
@@ -58,8 +63,44 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
   ];
 
   const handleFillDemoQuestion = () => {
-    setInputText(DEMO_INTERROGATION_SAMPLES[demoSampleIdx % DEMO_INTERROGATION_SAMPLES.length]);
+    const pool = activeCase.isKnifeNote
+      ? [DEMO_INTERROGATION_SAMPLES[1], ...activeCase.quickQuestions]
+      : activeCase.isDefaultCase
+        ? DEMO_INTERROGATION_SAMPLES
+        : activeCase.quickQuestions;
+    setInputText(pool[demoSampleIdx % pool.length]);
     setDemoSampleIdx((prev) => prev + 1);
+  };
+
+  const handleCopyTranscript = async () => {
+    const header = [
+      `SO‘ROQ BAYONNOMASI — ${activeCase.caseNumber}`,
+      `Ish: ${activeCase.title}`,
+      `Tergovchi: ${state.studentName} (${state.studentGroup})`,
+      `Gumonlanuvchi: ${activeCase.suspectName}`,
+      '--------------------------------------------------',
+    ].join('\n');
+
+    const lines = state.interrogationMessages.map((m) => {
+      const speaker =
+        m.role === 'system'
+          ? '[TIZIM]'
+          : m.role === 'investigator'
+            ? `[${m.timestamp}] TERGOVCHI`
+            : `[${m.timestamp}] GUMONLANUVCHI (${activeCase.suspectName})`;
+      const evalLine = m.evaluation
+        ? `\n   -> Svetofor: ${m.evaluation.coachTitle} (${m.evaluation.jpkReference}, ${m.evaluation.scoreDelta >= 0 ? `+${m.evaluation.scoreDelta}` : m.evaluation.scoreDelta} ball)`
+        : '';
+      return `${speaker}: ${m.text}${evalLine}`;
+    });
+
+    try {
+      await navigator.clipboard.writeText(`${header}\n${lines.join('\n\n')}`);
+      setCopiedTranscript(true);
+      window.setTimeout(() => setCopiedTranscript(false), 2500);
+    } catch {
+      setCopiedTranscript(false);
+    }
   };
 
   const investigatorQuestionsCount = state.interrogationMessages.filter(
@@ -213,10 +254,25 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
                 Kutilmagan burilish: Gumonlanuvchi yangi alibi ilgari surdi!
               </div>
               <p className="text-amber-900 leading-relaxed">
-                D.Tursunov kutilmaganda soat 14:15 da Yunusobodda emas, Sergeli tumanidagi avtoustaxonada bo‘lganini da’vo qilmoqda. 2-bosqichdagi{' '}
-                <span className="font-mono font-semibold">IMEI 354892104491820</span>,{' '}
-                <span className="font-mono font-semibold">IP 185.139.137.44</span> va{' '}
-                <span className="font-semibold">Yunusobod BS-TSH-104</span> tayanch stansiyasi billingi bilan uni fosh eting!
+                {activeCase.isKnifeNote ? (
+                  <>
+                    {activeCase.suspectName} soat 21:00–22:00 da restoranda bo‘lganini da’vo qilmoqda.{' '}
+                    <span className="font-mono font-semibold">Smart-Lock #4821 (21:14–21:38)</span>,{' '}
+                    <span className="font-mono font-semibold">restoran kamerasi (21:22)</span> hamda{' '}
+                    <span className="font-semibold">№ 2026/11-418 / № 2026/11-419</span> ekspertizalar bilan alibini fosh eting!
+                  </>
+                ) : activeCase.isDefaultCase ? (
+                  <>
+                    D.Tursunov kutilmaganda soat 14:15 da Yunusobodda emas, Sergeli tumanidagi avtoustaxonada bo‘lganini da’vo qilmoqda. 2-bosqichdagi{' '}
+                    <span className="font-mono font-semibold">IMEI 354892104491820</span>,{' '}
+                    <span className="font-mono font-semibold">IP 185.139.137.44</span> va{' '}
+                    <span className="font-semibold">Yunusobod BS-TSH-104</span> tayanch stansiyasi billingi bilan uni fosh eting!
+                  </>
+                ) : (
+                  <>
+                    {activeCase.suspectName} ish bo‘yicha yangi alibi ilgari surmoqda. To‘plangan raqamli loglar, ekspertiza va hujjatli dalillar asosida qarama-qarshiliklarni fosh eting!
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -232,18 +288,38 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Main Interrogation Chat Console */}
         <div className="xl:col-span-8 surface-card rounded-2xl flex flex-col overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-[#0B1221] text-white">
+          <div className="px-6 py-4 border-b border-[#C0CEC8] flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#D7E4DF] via-[#E2EAE6] to-[#EAEFED] text-slate-900">
             <div>
-              <div className="text-[11px] font-mono text-amber-300">
-                4-bosqich · Audio-vizual so‘roq xonasi
+              <div className="text-[11px] font-mono font-semibold text-teal-800">
+                4-bosqich · Audio-vizual so‘roq xonasi · {activeCase.caseNumber}
               </div>
-              <h2 className="text-base font-bold text-white mt-0.5">
-                AI-So‘roq — Gumonlanuvchi D.Tursunov
+              <h2 className="text-base font-bold text-slate-900 mt-0.5">
+                AI-So‘roq — Gumonlanuvchi {activeCase.suspectName}
               </h2>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                type="button"
+                onClick={handleCopyTranscript}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#B8C7C0] bg-[#F2F4F3] hover:bg-[#E2EAE6] text-slate-800 transition-colors cursor-pointer whitespace-nowrap"
+                title="So‘roq bayonnomasini nusxalash"
+              >
+                {copiedTranscript ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-teal-700" />
+                    <span className="text-teal-800">Nusxalandi</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-teal-700" />
+                    <span>Bayonnomani nusxalash</span>
+                  </>
+                )}
+              </motion.button>
               <div className="relative">
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
                   type="button"
                   onClick={() => {
                     if (isAudioEnabled) stopSpeaking();
@@ -251,8 +327,8 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
                   }}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
                     isAudioEnabled
-                      ? 'bg-blue-500/20 border-blue-400/40 text-blue-200'
-                      : 'bg-slate-800 border-slate-700 text-slate-400'
+                      ? 'bg-[#0F766E] border-[#0F766E] text-white'
+                      : 'bg-[#E9EEEC] border-[#C2CFC9] text-slate-600'
                   }`}
                   title={isAudioEnabled ? "Gumonlanuvchi javoblarini ovozda o'qishni o'chirish" : "Ovozda o'qishni yoqish"}
                 >
@@ -267,7 +343,7 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
                       <span>Ovoz: O‘chirilgan</span>
                     </>
                   )}
-                </button>
+                </motion.button>
               </div>
 
               <button
@@ -275,71 +351,85 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
                 onClick={() => setShowVoiceInfo(!showVoiceInfo)}
                 className={`p-1.5 rounded-lg border text-xs cursor-pointer transition-colors ${
                   showVoiceInfo
-                    ? 'bg-amber-400 border-amber-300 text-[#0B1221]'
-                    : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white'
+                    ? 'bg-amber-400 border-amber-500 text-slate-900'
+                    : 'bg-[#F2F4F3] border-[#B8C7C0] text-slate-700 hover:bg-[#E2EAE6]'
                 }`}
                 title="Ovoz sifati va aksent haqida ma'lumot"
               >
                 <Info className="w-3.5 h-3.5" />
               </button>
 
-              <div className="text-xs font-mono tabular-nums text-slate-300 pl-1">
+              <div className="text-xs font-mono tabular-nums text-slate-700 font-semibold pl-1">
                 Savollar: {investigatorQuestionsCount}/3+
               </div>
             </div>
           </div>
 
           {/* Voice explanation help note */}
-          {showVoiceInfo && (
-            <div className="bg-blue-50/90 border-b border-blue-200 px-6 py-3 text-xs text-slate-700 flex items-start gap-2.5">
-              <Info className="w-4 h-4 text-[#1D4ED8] shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <div className="font-semibold text-[#0F172A]">
-                  Nega brauzer ovozi o‘zbekcha so‘zlarni aksent bilan o‘qiydi?
-                </div>
+          <AnimatePresence>
+            {showVoiceInfo && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18 }}
+                className="bg-[#E4EFEA] border-b border-[#B9CEC5] px-6 py-3 text-xs text-slate-700 flex items-start gap-2.5"
+              >
+                <Info className="w-4 h-4 text-teal-800 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="font-semibold text-slate-900">
+                    Nega brauzer ovozi o‘zbekcha so‘zlarni aksent bilan o‘qiydi?
+                  </div>
                 <p className="leading-relaxed text-slate-600">
                   Windows va macOS kompyuterlarida sukut bo‘yicha rasmiy o‘zbek tili ovoz paketi (uz-UZ) o‘rnatilmagan bo‘ladi.
                   Shuning uchun brauzerning ichki sintezatori matnni eng yaqin turkiy/ingliz fonetikasida talaffuz qiladi.
                   Agar bu sizga xalaqit bersa, yuqoridagi <strong>«Ovoz: O‘chirilgan»</strong> tugmasini bosib, tergovni to‘liq matnli rejimda olib borishingiz mumkin.
                 </p>
               </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Chat Feed */}
-          <div className="p-5 space-y-4 max-h-[470px] overflow-y-auto bg-[#F8FAFC]">
+          <div className="p-5 space-y-4 max-h-[470px] overflow-y-auto bg-[#E9EEEC]">
             {state.interrogationMessages.map((msg) => {
               if (msg.role === 'system') {
                 return (
-                  <div
+                  <motion.div
                     key={msg.id}
-                    className="text-center text-xs text-slate-500 py-1.5 px-4 bg-white border border-slate-200 rounded-lg"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-center text-xs text-slate-600 py-1.5 px-4 bg-[#F4F6F5] border border-[#C6D1CC] rounded-lg"
                   >
                     {msg.text}
-                  </div>
+                  </motion.div>
                 );
               }
 
               const isInvestigator = msg.role === 'investigator';
               return (
-                <div
+                <motion.div
                   key={msg.id}
+                  initial={{ opacity: 0, y: 10, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
                   className={`flex flex-col ${isInvestigator ? 'items-end' : 'items-start'}`}
                 >
                   <div
                     className={`max-w-[88%] rounded-xl p-4 text-sm leading-relaxed border ${
                       isInvestigator
-                        ? 'bg-[#1D4ED8] text-white border-[#1D4ED8]'
-                        : 'bg-white text-[#0F172A] border-[#E2E8F0]'
+                        ? 'bg-[#0F766E] text-white border-[#0F766E] shadow-xs'
+                        : 'bg-[#F5F7F6] text-slate-900 border-[#C6D1CC]'
                     }`}
                   >
                     <div
                       className={`flex items-center justify-between gap-4 text-[11px] mb-1.5 ${
-                        isInvestigator ? 'text-blue-100' : 'text-slate-500'
+                        isInvestigator ? 'text-teal-100' : 'text-slate-600'
                       }`}
                     >
                       <span className="font-semibold">
-                        {isInvestigator ? 'Tergovchi (Siz)' : 'Gumonlanuvchi: D.Tursunov'}
+                        {isInvestigator ? 'Tergovchi (Siz)' : `Gumonlanuvchi: ${activeCase.suspectName}`}
                       </span>
                       <div className="flex items-center gap-2">
                         {!isInvestigator && (
@@ -347,9 +437,9 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
                             type="button"
                             title="Ovozda eshitish"
                             onClick={() => handleSpeakMessage(msg.id, msg.text)}
-                            className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-[#1D4ED8] transition-colors"
+                            className="p-1 rounded hover:bg-[#E2EAE6] text-slate-600 hover:text-teal-800 transition-colors cursor-pointer"
                           >
-                            <Volume2 className={`w-3.5 h-3.5 ${activeSpeakingId === msg.id ? 'text-[#1D4ED8] animate-pulse' : ''}`} />
+                            <Volume2 className={`w-3.5 h-3.5 ${activeSpeakingId === msg.id ? 'text-teal-700 animate-pulse' : ''}`} />
                           </button>
                         )}
                         <span className="font-mono tabular-nums">{msg.timestamp}</span>
@@ -395,13 +485,13 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
                       </p>
                     </div>
                   )}
-                </div>
+                </motion.div>
               );
             })}
 
             {isSending && (
-              <div className="flex items-center gap-2 text-xs text-slate-500 pl-2">
-                <Loader2 className="w-4 h-4 animate-spin text-[#1D4ED8]" />
+              <div className="flex items-center gap-2 text-xs text-slate-600 pl-2">
+                <Loader2 className="w-4 h-4 animate-spin text-teal-700" />
                 <span>Gumonlanuvchi javob tayyorlamoqda va Svetofor tahlil qilmoqda...</span>
               </div>
             )}
@@ -409,7 +499,7 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
           </div>
 
           {/* Quick-Suggest Questions */}
-          <div className="px-5 pt-3 pb-2 border-t border-slate-200 bg-white space-y-2">
+          <div className="px-5 pt-3 pb-2 border-t border-[#C6D1CC] bg-[#F2F4F3] space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="text-[11px] font-semibold text-slate-600">
                 Tavsiya etilgan tergov savollari (bosib yuborish):
@@ -419,9 +509,9 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
                   type="button"
                   disabled={isSending}
                   onClick={() => onSendQuestion(DEMO_INTERROGATION_SAMPLES[0])}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-950 text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#DDEAE5] hover:bg-[#CEE1DA] border border-[#AFC8BF] text-teal-950 text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
                 >
-                  <Wand2 className="w-3 h-3 text-[#1D4ED8]" />
+                  <Wand2 className="w-3 h-3 text-teal-800" />
                   <span>Demo savol (1-kazus)</span>
                 </button>
                 <button
@@ -444,7 +534,7 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              {QUICK_INTERROGATION_QUESTIONS.map((q, idx) => (
+              {activeCase.quickQuestions.map((q, idx) => (
                 <button
                   key={idx}
                   type="button"
@@ -497,19 +587,19 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
           {/* Free-text Input with Microphone Speech-to-Text */}
           <form
             onSubmit={handleSubmit}
-            className="p-4 border-t border-slate-200 bg-white flex items-center gap-2"
+            className="p-4 border-t border-[#C6D1CC] bg-[#F2F4F3] flex items-center gap-2"
           >
             <button
               type="button"
               onClick={handleToggleSpeechRecognition}
               title={isListening ? 'Ovoz yozishni to‘xtatish' : 'Ovozli so‘roq (Mikrofon)'}
-              className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 isListening
-                  ? 'bg-red-500 text-white border-red-600 animate-pulse'
-                  : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                  ? 'bg-red-600 text-white border-red-700 animate-pulse'
+                  : 'bg-[#E6ECE9] hover:bg-[#DAE4DF] border-[#C2CFC9] text-slate-800'
               }`}
             >
-              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4 text-[#1D4ED8]" />}
+              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4 text-teal-800" />}
               <span className="hidden sm:inline">{isListening ? 'To‘xtatish' : 'Ovozli so‘roq'}</span>
             </button>
             <input
@@ -518,16 +608,17 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
               onChange={(e) => setInputText(e.target.value)}
               disabled={isSending}
               placeholder={isListening ? "Tinglanmoqda... gapiring..." : "O'zbek tilida savolingizni yozing yoki mikrofonga bosing..."}
-              className="flex-1 rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]"
+              className="flex-1 rounded-xl border border-[#C2CFC9] bg-[#F6F8F7] px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
             />
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               type="submit"
               disabled={isSending || !inputText.trim()}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#1D4ED8] hover:bg-blue-800 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#0F766E] hover:bg-[#115E59] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50 shadow-xs"
             >
               <Send className="w-4 h-4" />
               <span>Yuborish</span>
-            </button>
+            </motion.button>
           </form>
         </div>
 
@@ -543,8 +634,8 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
 
           {/* Svetofor Legend */}
           <div className="surface-card rounded-2xl p-5 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-bold text-[#0F172A]">
-              <ShieldAlert className="w-4 h-4 text-[#1D4ED8]" />
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
+              <ShieldAlert className="w-4 h-4 text-teal-800" />
               <span>«Svetofor» real-vaqt indikatori</span>
             </div>
             <div className="space-y-2.5 text-xs">
@@ -640,69 +731,87 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
             </div>
 
             {!state.step4Completed ? (
-              <button
+              <motion.button
+                whileTap={canFinishStep ? { scale: 0.98 } : undefined}
                 type="button"
                 disabled={!canFinishStep}
                 onClick={onCompleteStep4}
-                className={`w-full py-2.5 px-4 text-xs font-semibold rounded-lg transition-colors ${
+                className={`w-full py-2.5 px-4 text-xs font-semibold rounded-xl transition-colors ${
                   canFinishStep
-                    ? 'bg-[#1D4ED8] hover:bg-blue-800 text-white cursor-pointer'
-                    : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                    ? 'bg-[#0F766E] hover:bg-[#115E59] text-white cursor-pointer shadow-xs'
+                    : 'bg-[#DCE3E0] text-slate-500 cursor-not-allowed'
                 }`}
               >
                 So‘roq bayonnomasini yakunlash
-              </button>
+              </motion.button>
             ) : (
-              <button
+              <motion.button
+                whileHover={{ x: 2 }}
+                whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={onNextStep}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-semibold rounded-lg bg-[#1D4ED8] hover:bg-blue-800 text-white cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-semibold rounded-xl bg-[#0F766E] hover:bg-[#115E59] text-white cursor-pointer shadow-xs"
               >
                 <span>5-bosqich: Prokuror nazorati</span>
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
       </div>
 
       {/* PF-257 Ethical Dilemma Modal */}
-      {state.ethicsDilemmaOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/65 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E2E8F0] rounded-xl max-w-xl w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
-              <div>
-                <div className="text-xs font-semibold text-[#D97706]">
-                  {ETHICS_DILEMMA.codeRef}
+      <AnimatePresence>
+        {state.ethicsDilemmaOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-xs flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-[#F2F4F3] border border-[#C6D1CC] rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4"
+            >
+              <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#CFD8D4]">
+                <div>
+                  <div className="text-xs font-semibold text-amber-700">
+                    {ETHICS_DILEMMA.codeRef}
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mt-0.5">
+                    {ETHICS_DILEMMA.title}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-bold text-[#0F172A] mt-0.5">
-                  {ETHICS_DILEMMA.title}
-                </h3>
               </div>
-            </div>
 
-            <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 border border-slate-200 rounded-lg p-4">
-              {ETHICS_DILEMMA.scenario}
-            </p>
+              <p className="text-sm text-slate-700 leading-relaxed bg-[#E9EEEC] border border-[#C6D1CC] rounded-xl p-4">
+                {ETHICS_DILEMMA.scenario}
+              </p>
 
-            <div className="space-y-3">
-              {ETHICS_DILEMMA.options.map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => onAnswerEthics(opt.id)}
-                  className="w-full text-left p-4 rounded-xl border border-[#E2E8F0] hover:border-[#1D4ED8] hover:bg-blue-50/40 transition-colors cursor-pointer"
-                >
-                  <div className="text-sm font-semibold text-[#0F172A]">{opt.title}</div>
-                  <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                    {opt.description}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+              <div className="space-y-3">
+                {ETHICS_DILEMMA.options.map((opt) => (
+                  <motion.button
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.99 }}
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onAnswerEthics(opt.id)}
+                    className="w-full text-left p-4 rounded-xl bg-[#F5F7F6] border border-[#C6D1CC] hover:border-[#0F766E] hover:bg-[#E7F0EC] transition-colors cursor-pointer"
+                  >
+                    <div className="text-sm font-semibold text-slate-900">{opt.title}</div>
+                    <p className="mt-1 text-xs text-slate-600 leading-relaxed">
+                      {opt.description}
+                    </p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

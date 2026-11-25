@@ -59,27 +59,46 @@ async function startServer() {
       twistActive = false,
       pinnedClues = [],
       engine = 'gemini',
+      caseId = 'case-168',
+      suspectName = '',
+      caseSummary = '',
     } = req.body as {
       question: string;
       history: Array<{ role: string; text: string }>;
       twistActive: boolean;
       pinnedClues: string[];
       engine?: 'gemini' | 'claude';
+      caseId?: string;
+      suspectName?: string;
+      caseSummary?: string;
     };
 
-    if (!question || typeof question !== 'string') {
+    if (!question || typeof question !== 'string' || !question.trim()) {
       return res.status(400).json({ error: "Savol matni kiritilmagan." });
     }
+
+    const safeCaseId = typeof caseId === 'string' ? caseId.slice(0, 64) : 'case-168';
+    const safeSuspect = typeof suspectName === 'string' ? suspectName.trim().slice(0, 120) : '';
+    const safeSummary = typeof caseSummary === 'string' ? caseSummary.trim().slice(0, 600) : '';
 
     const historyText = history
       .slice(-6)
       .map((m) => `${m.role === 'investigator' ? 'Tergovchi' : 'Gumonlanuvchi'}: ${m.text}`)
       .join('\n');
 
+    let suspectContext = '';
+    if (safeCaseId === 'CASE-02-KNIFE-NOTE') {
+      suspectContext = `1) Gumonlanuvchi ${safeSuspect || 'B. Raximov (1991-y.t.)'} — JK 97-modda 1-qismi («Soxta xayrlashuv xati» ishi, 47-xonadon). U soat 21:00–22:00 da shahar markazidagi restoranda bo'lganini aytib o'zini oqlaydi. Agar tergovchi soat 21:22 dagi restoran kassa kamerasi/cheki, 21:14–21:38 oralig'idagi Smart-Lock PIN #4821 jurnali, Dalil_Pichoq (ekspertiza № 2026/11-418) yoki Dalil_Xat (ekspertiza № 2026/11-419) dalillarini keltirsa, u dovdirab qoladi va bu yolg'on alibini fosh etish sifatida baholansin (trafficLight: "green", scoreDelta: 10, alibiContradicted: true).`;
+    } else if (safeCaseId === 'case-168' || !safeSummary) {
+      suspectContext = `1) Gumonlanuvchi ${safeSuspect || 'Dilshod Tursunov'} (28 yosh, bank kartasidan 42 500 000 so'm mablag'ni firibgarlik yo'li bilan o'zlashtirishda gumon qilinmoqda). U o'zini oqlashga urinadi.
+${twistActive ? "MUHIM BURILISH: Gumonlanuvchi soat 14:15 da Yunusobod tumanida emas, Sergeli tumanida mashina ustaxonasida bo'lganini aytib, alibi da'vo qilmoqda. Agar tergovchi Chilonzor/Yunusobod tayanch stansiyasi billingi, IMEI 354892104491820, IP manzil 185.139.137.44 yoki 8600****9104 tranzit kartasini aniq dalil sifatida keltirsa, u dovdirab qoladi va qisman tan ola boshlaydi (alibiContradicted: true)." : "U dastlab hech qanday phishing havola yubormaganini va kartani tanishiga berganini aytadi."}
+QO'SHIMCHA 3D KAZUS (CASE-02-KNIFE-NOTE) ZIDDIYATI: Agar tergovchi soat 21:22 dagi restoran kassa kamerasi/cheki, 21:14–21:38 oralig'idagi Smart-Lock PIN #4821 jurnali, Dalil_Pichoq (ekspertiza № 2026/11-418) yoki Dalil_Xat (ekspertiza № 2026/11-419) dalillarini keltirsa, bu ham yolg'on alibini fosh etish sifatida baholansin (trafficLight: "green", scoreDelta: 10, alibiContradicted: true).`;
+    } else {
+      suspectContext = `1) Gumonlanuvchi ${safeSuspect || 'ish bo‘yicha gumonlanuvchi'}. Jinoyat ishi tafsiloti (${safeCaseId}): ${safeSummary}. U dastlab aybini rad etadi va o'zini oqlashga urinadi; tergovchi aniq hujjatli/raqamli dalil keltirsa dovdirab qoladi (alibiContradicted: true).`;
+    }
+
     const systemPrompt = `Siz O'zbekiston Respublikasi Huquqni muhofaza qilish akademiyasining virtual tergov simulyatorida ikki vazifani bajarasiz:
-1) Gumonlanuvchi Dilshod Tursunov (28 yosh, bank kartasidan 42 500 000 so'm mablag'ni firibgarlik yo'li bilan o'zlashtirishda gumon qilinmoqda). U o'zini oqlashga urinadi.
-${twistActive ? "MUHIM BURILISH: Gumonlanuvchi soat 14:15 da Yunusobod tumanida emas, Sergeli tumanida mashina ustaxonasida bo'lganini aytib, alibi da'vo qilmoqda. Agar tergovchi Chilonzor/Yunusobod tayanch stansiyasi billingi, IMEI 354892104491820, IP manzil 185.139.137.44 yoki 8600****9104 tranzit kartasini aniq dalil sifatida keltirsa, u dovdirab qoladi va qisman tan ola boshlaydi." : "U dastlab hech qanday phishing havola yubormaganini va kartani tanishiga berganini aytadi."}
-QO'SHIMCHA 3D KAZUS (CASE-02-KNIFE-NOTE) ZIDDIYATI: Agar tergovchi soat 21:22 dagi restoran kassa kamerasi/cheki, 21:14–21:38 oralig'idagi Smart-Lock PIN #4821 jurnali, Dalil_Pichoq (ekspertiza № 2026/11-418) yoki Dalil_Xat (ekspertiza № 2026/11-419) dalillarini keltirsa, bu yolg'on alibini fosh etish sifatida baholansin (trafficLight: "green", scoreDelta: 10, alibiContradicted: true).
+${suspectContext}
 2) JPK (Jinoyat-protsessual kodeksi) bo'yicha "Svetofor" murabbiyi sifatida tergovchining savolini baholaysiz:
 - "green" (+10 ball): Ochiq, xolis, qonuniy, fakt va dalillarga asoslangan savol.
 - "yellow" (+3 ball): Biroz umumiy, takroriy yoki yetarlicha aniqlashtirilmagan savol.
@@ -87,11 +106,11 @@ QO'SHIMCHA 3D KAZUS (CASE-02-KNIFE-NOTE) ZIDDIYATI: Agar tergovchi soat 21:22 da
 
 Faqatgina JSON formatida quyidagi kalitlar bilan javob bering: trafficLight (green/yellow/red), scoreDelta (10, 3, yoki -10), coachTitle (string), coachExplanation (string), jpkReference (string), suspectReply (string), alibiContradicted (boolean). Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`;
 
-    const userPrompt = `Tergovchi tomonidan dalillar doskasida belgilangan dalillar soni: ${pinnedClues.length}.
+    const userPrompt = `Faol kazus ID: ${safeCaseId}. Tergovchi tomonidan dalillar doskasida belgilangan dalillar soni: ${pinnedClues.length}.
 Oldingi suhbat:
 ${historyText || "Suhbat endi boshlandi."}
 
-Tergovchining yangi savoli: "${question}"`;
+Tergovchining yangi savoli: "${question.slice(0, 1000)}"`;
 
     if (engine === 'claude') {
       const claudeClient = getAnthropicClient();
@@ -466,7 +485,10 @@ Iltimos:
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: false,
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);

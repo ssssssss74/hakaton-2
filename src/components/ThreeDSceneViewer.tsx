@@ -570,8 +570,7 @@ const ThreeDSceneViewerInner: React.FC<ThreeDSceneViewerProps> = ({
       restoreDefaultRoom,
     };
 
-    // Auto-load public/models/xona.glb when available
-    void loadGlbUrl('/models/xona.glb', 'public/models/xona.glb', modelAbort.signal, true);
+    // Keep rich procedural forensic room active by default; users can still load xona.glb on demand via dock button
 
     // Pre-warm shaders on real GPUs
     if (!isSoftwareGl) {
@@ -705,10 +704,10 @@ const ThreeDSceneViewerInner: React.FC<ThreeDSceneViewerProps> = ({
     : false;
 
   const wrapperClass = isExpanded
-    ? 'fixed inset-0 z-50 bg-[#090e18] text-slate-100 flex flex-col'
+    ? 'fixed inset-0 z-50 bg-[#E3E7E5] text-slate-900 flex flex-col'
     : fullViewport
-      ? 'relative w-full h-[calc(100vh-8rem)] min-h-[560px] rounded-2xl overflow-hidden border border-slate-800 bg-[#090e18] text-slate-100 shadow-2xl'
-      : 'relative w-full h-[520px] rounded-2xl overflow-hidden border border-slate-800 bg-[#090e18] text-slate-100 shadow-2xl';
+      ? 'relative w-full h-[calc(100vh-8rem)] min-h-[560px] rounded-2xl overflow-hidden border border-[#B8C6C0] bg-[#E3E7E5] text-slate-900 shadow-xl'
+      : 'relative w-full h-[520px] rounded-2xl overflow-hidden border border-[#B8C6C0] bg-[#E3E7E5] text-slate-900 shadow-xl';
 
   return (
     <div ref={containerRef} className={wrapperClass}>
@@ -735,34 +734,34 @@ const ThreeDSceneViewerInner: React.FC<ThreeDSceneViewerProps> = ({
         </div>
       )}
 
-      {/* Minimal Top-Left Control Guide Badge (Solid rgba, no backdrop-filter over WebGL) */}
-      <div className="absolute top-3.5 left-3.5 z-10 max-w-[calc(100%-28px)] sm:max-w-xl bg-slate-950/90 border border-slate-700/90 rounded-xl px-3.5 py-2 text-xs text-slate-200 pointer-events-auto">
+      {/* Minimal Top-Left Control Guide Badge */}
+      <div className="absolute top-3.5 left-3.5 z-10 max-w-[calc(100%-28px)] sm:max-w-xl bg-[#EEF1EF]/95 border border-[#B8C6C0] rounded-xl px-3.5 py-2 text-xs text-slate-900 shadow-md pointer-events-auto">
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-          <span className="font-bold text-blue-400">3D Hodisa joyi</span>
-          <span className="text-slate-600">|</span>
-          <span className="text-slate-300">
-            Ekranni bosing: Kamerani aylantirish · <span className="font-mono text-white">W,A,S,D</span>: Yurish ·{' '}
-            <span className="font-mono text-white">ESC</span>: Sichqonchani chiqarish
+          <span className="font-bold text-teal-800">3D Hodisa joyi</span>
+          <span className="text-slate-300">|</span>
+          <span className="text-slate-700">
+            Ekranni bosing: Kamerani aylantirish · <span className="font-mono text-slate-900 font-bold">W,A,S,D</span>: Yurish ·{' '}
+            <span className="font-mono text-slate-900 font-bold">ESC</span>: Sichqonchani chiqarish
           </span>
         </div>
         {hoveredInfo && !isPointerLocked && (
-          <div className="mt-1 text-[11px] text-amber-300 font-medium">
+          <div className="mt-1 text-[11px] text-amber-700 font-semibold">
             Dalil aniqlandi: {hoveredInfo.title} ({hoveredInfo.id}) — ko‘rish uchun bosing
           </div>
         )}
         {customModelLabel && (
-          <div className="mt-1 flex items-center gap-2 text-[11px] text-emerald-400 font-mono">
+          <div className="mt-1 flex items-center gap-2 text-[11px] text-emerald-700 font-mono">
             <span>Model: {customModelLabel}</span>
             <button
               type="button"
               onClick={() => sceneApiRef.current?.restoreDefaultRoom()}
-              className="underline text-slate-300 hover:text-white cursor-pointer"
+              className="underline text-slate-600 hover:text-slate-950 cursor-pointer"
             >
               Asl xonaga qaytish
             </button>
           </div>
         )}
-        {modelError && <div className="mt-1 text-[11px] text-red-400">{modelError}</div>}
+        {modelError && <div className="mt-1 text-[11px] text-red-600">{modelError}</div>}
       </div>
 
       {/* UV / Lazer Skener HUD Overlay */}
@@ -791,34 +790,34 @@ const ThreeDSceneViewerInner: React.FC<ThreeDSceneViewerProps> = ({
         </div>
       )}
 
-      {/* Selected Evidence Forensic Card (Bottom-Right, only when a Dalil_* item is clicked) */}
+      {/* Selected Evidence Forensic Card */}
       {selectedEvidence && (
-        <div className="absolute bottom-24 right-4 z-20 w-[min(360px,calc(100%-32px))] max-h-[72vh] overflow-y-auto bg-[#0D1628] border border-cyan-500/45 rounded-xl p-4 text-slate-100 shadow-2xl space-y-3">
+        <div className="absolute bottom-24 right-4 z-20 w-[min(360px,calc(100%-32px))] max-h-[72vh] overflow-y-auto bg-[#F2F4F3] border border-[#B8C6C0] rounded-xl p-4 text-slate-900 shadow-xl space-y-3">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <div className="inline-block px-2 py-0.5 rounded bg-blue-950 border border-blue-700/60 text-blue-300 text-[10px] font-mono mb-1">
+              <div className="inline-block px-2 py-0.5 rounded bg-emerald-50 border border-emerald-300 text-emerald-800 text-[10px] font-mono mb-1">
                 {selectedEvidence.category} · {selectedEvidence.jpkRef}
               </div>
-              <h3 className="text-sm font-bold text-white leading-snug">
+              <h3 className="text-sm font-bold text-slate-900 leading-snug">
                 {selectedEvidence.title}
               </h3>
             </div>
             <button
               type="button"
               onClick={() => setSelectedEvidence(null)}
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+              className="p-1 rounded-lg text-slate-500 hover:text-slate-950 hover:bg-emerald-50 cursor-pointer"
               aria-label="Yopish"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <p className="text-xs text-slate-300 leading-relaxed">{selectedEvidence.desc}</p>
+          <p className="text-xs text-slate-600 leading-relaxed">{selectedEvidence.desc}</p>
 
-          <ul className="space-y-1 text-[11px] text-slate-300 border-t border-slate-800 pt-2.5">
+          <ul className="space-y-1 text-[11px] text-slate-700 border-t border-emerald-100 pt-2.5">
             {selectedEvidence.details.map((item, idx) => (
               <li key={idx} className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 mt-1.5" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0 mt-1.5" />
                 <span>{item}</span>
               </li>
             ))}
@@ -1077,7 +1076,7 @@ const ThreeDSceneViewerInner: React.FC<ThreeDSceneViewerProps> = ({
               <span>UV / Lazer Skener</span>
             </button>
 
-            {/* Upload custom Blender xona.glb */}
+            {/* Upload custom Blender .glb model */}
             <input
               ref={fileInputRef}
               type="file"
@@ -1085,14 +1084,6 @@ const ThreeDSceneViewerInner: React.FC<ThreeDSceneViewerProps> = ({
               onChange={handleFileChange}
               className="hidden"
             />
-            <button
-              type="button"
-              onClick={() => sceneApiRef.current?.loadDefaultGlb()}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-emerald-300 hover:text-emerald-200 text-xs font-medium cursor-pointer"
-              title="public/models/xona.glb modelini yuklash"
-            >
-              <span>xona.glb (3D)</span>
-            </button>
 
             <button
               type="button"

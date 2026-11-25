@@ -23,6 +23,7 @@ import {
   EVIDENCE_CLUES,
   STEP1_OPTIONS,
   createInitialState,
+  resolveActiveCaseMeta,
 } from './data/caseData';
 import { CustomCase, DecisionFormState, SimulationState } from './types/simulation';
 
@@ -31,12 +32,20 @@ const STORAGE_KEY = 'e_tergov_lab_sim_state_v1';
 async function fetchWithTimeout(
   url: string,
   options: RequestInit,
-  timeoutMs = 6500
+  timeoutMs = 2200
 ): Promise<Response> {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new Error('Offline mode: using instant local simulator');
+  }
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error('Static/offline host detected: switching to local engine');
+    }
+    return res;
   } finally {
     window.clearTimeout(timer);
   }
@@ -47,8 +56,8 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const parsed = JSON.parse(saved) as SimulationState;
-        return { ...parsed, maxUnlockedStep: 6 };
+        const parsed = JSON.parse(saved) as Partial<SimulationState>;
+        return { ...createInitialState(), ...parsed, maxUnlockedStep: 6 };
       }
     } catch (e) {
       console.error('Failed to load state from localStorage', e);
@@ -91,6 +100,22 @@ export default function App() {
       currentStep: step,
       maxUnlockedStep: Math.max(prev.maxUnlockedStep, step),
     }));
+  };
+
+  const handleActivateCase = (caseId: string, navigateToInvestigation = true) => {
+    setState((prev) => {
+      const fresh = createInitialState(caseId, prev.customCases);
+      return {
+        ...fresh,
+        studentName: prev.studentName,
+        studentGroup: prev.studentGroup,
+        aiEngine: prev.aiEngine,
+        duelJoined: prev.duelJoined,
+        activeView: navigateToInvestigation ? 'investigation' : 'dashboard',
+        currentStep: 1,
+        maxUnlockedStep: 6,
+      };
+    });
   };
 
   // Step 1 Actions
@@ -235,10 +260,13 @@ export default function App() {
 
   const handleRunJpkAudit = () => {
     const { jkArticle, jpkBasis, mandatoryRequisites } = state.decisionForm;
+    const activeMeta = resolveActiveCaseMeta(state.activeCaseId, state.customCases);
     const issues: string[] = [];
 
-    if (jkArticle !== 'JK_168_3') {
-      issues.push("JK kvalifikatsiyasi xato tanlandi (JK 168-modda 3-qismi o'rniga boshqa modda ko'rsatilgan).");
+    if (jkArticle !== activeMeta.expectedJkValue) {
+      issues.push(
+        `JK kvalifikatsiyasi xato tanlandi (${activeMeta.expectedJkLabel} o‘rniga boshqa modda ko‘rsatilgan).`
+      );
     }
     if (jpkBasis !== 'JPK_321_322') {
       issues.push("JPK asoslari noto'g'ri tanlandi.");
@@ -292,6 +320,8 @@ export default function App() {
       timestamp: simTime.slice(11, 16),
     };
 
+    const activeMeta = resolveActiveCaseMeta(state.activeCaseId, state.customCases);
+
     try {
       const response = await fetchWithTimeout('/api/interrogate', {
         method: 'POST',
@@ -302,6 +332,9 @@ export default function App() {
           twistActive: state.twistTriggered || state.interrogationMessages.length >= 4,
           pinnedClues: state.pinnedClueIds,
           engine: state.aiEngine,
+          caseId: activeMeta.id,
+          suspectName: activeMeta.suspectName,
+          caseSummary: activeMeta.summary102,
         }),
       });
 
@@ -788,6 +821,7 @@ export default function App() {
           metrics={metrics}
           onStartInvestigation={handleStartInvestigation}
           onNavigate={handleNavigate}
+          onActivateCase={handleActivateCase}
         />
       )}
 
@@ -858,6 +892,7 @@ export default function App() {
         <InstructorAnalyticsView
           state={state}
           onAddCustomCase={handleAddCustomCase}
+          onActivateCase={handleActivateCase}
         />
       )}
     </Layout>
@@ -865,5 +900,6 @@ export default function App() {
 }
 
 function ACTIVE_CASE_SUMMARY_TEXT(state: SimulationState): string {
-  return `Kiberfiribgarlik ishi: 42.5 mln so'm mablag' TuronPay orqali yechilgan. Pin qilingan dalillar soni: ${state.pinnedClueIds.length}.`;
+  const meta = resolveActiveCaseMeta(state.activeCaseId, state.customCases);
+  return `${meta.caseNumber} — ${meta.title} (${meta.shortCategory}). Gumonlanuvchi: ${meta.suspectName}. Pin qilingan dalillar soni: ${state.pinnedClueIds.length}.`;
 }

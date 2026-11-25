@@ -130,6 +130,7 @@ export interface StudentLeaderboardEntry {
 }
 
 export interface SimulationState {
+  activeCaseId?: string;
   studentName: string;
   studentGroup: string;
   aiEngine: 'gemini' | 'claude';

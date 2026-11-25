@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import {
   Gavel,
   Scale,
@@ -13,7 +14,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { ComputedMetrics, NavView, SimulationState } from '../../types/simulation';
-import { CASE_02_KNIFE_NOTE, PROSECUTOR_CHECKLIST } from '../../data/caseData';
+import { CASE_02_KNIFE_NOTE, PROSECUTOR_CHECKLIST, resolveActiveCaseMeta } from '../../data/caseData';
 import { playGavelSound } from '../../utils/audioEffects';
 import { VISUAL_ASSETS } from '../../assets/visuals';
 import { PrintableProtocolCertificate } from '../PrintableProtocolCertificate';
@@ -44,8 +45,11 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
   const [journalFilter, setJournalFilter] = useState<'all' | 'green' | 'issues'>('all');
   const { courtSession } = state;
 
+  const activeCase = resolveActiveCaseMeta(state.activeCaseId, state.customCases);
   const isKnifeNoteCase =
-    state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat');
+    state.activeCaseId === 'CASE-02-KNIFE-NOTE' ||
+    state.pinnedClueIds.includes('Dalil_Pichoq') ||
+    state.pinnedClueIds.includes('Dalil_Xat');
   const prosecutorChecklist = isKnifeNoteCase
     ? CASE_02_KNIFE_NOTE.prosecutorChecklist
     : PROSECUTOR_CHECKLIST;
@@ -99,8 +103,8 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
   return (
     <div className="space-y-6">
       {/* Cinematic Virtual Courtroom Header Banner */}
-      <section className="rounded-2xl overflow-hidden bg-[#091224] border border-cyan-500/30 shadow-2xl">
-        <div className="relative bg-[#070E1C] text-slate-100 border-b border-cyan-500/20 overflow-hidden">
+      <section className="rounded-2xl overflow-hidden bg-[#102021] border border-teal-500/30 shadow-xl">
+        <div className="relative bg-[#0D1A1B] text-slate-100 border-b border-teal-500/20 overflow-hidden">
           {!courtImgFailed ? (
             <img
               src={VISUAL_ASSETS.courtroomGavel}
@@ -110,9 +114,9 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
               className="absolute inset-0 w-full h-full object-cover object-center opacity-35"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0B1221] via-[#172544] to-[#0B1221]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0F2423] via-[#153533] to-[#0F2423]" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#070E1C]/96 via-[#070E1C]/86 to-[#070E1C]/65" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0D1A1B]/95 via-[#0F2122]/85 to-[#0F2122]/65" />
 
           <div className="relative z-10 px-6 py-5 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
@@ -258,15 +262,17 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
                   </span>
                 </div>
                 <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${proofLevel}%` }}
+                    transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+                    className={`h-full rounded-full ${
                       proofLevel >= 75
-                        ? 'bg-gradient-to-r from-cyan-400 to-emerald-400'
+                        ? 'bg-gradient-to-r from-teal-400 to-emerald-400'
                         : proofLevel >= 50
                           ? 'bg-gradient-to-r from-amber-500 to-amber-300'
                           : 'bg-gradient-to-r from-red-600 to-red-400'
                     }`}
-                    style={{ width: `${proofLevel}%` }}
                   />
                 </div>
                 <div className="text-[11px] text-slate-300">
@@ -282,11 +288,13 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
                   <p className="text-xs text-slate-200 leading-relaxed">
                     Sud majlisini ochish uchun quyidagi tugmani bosing — Himoyachi sizning 1–5-bosqichlardagi harakatlaringiz asosida JPK 95¹ e’tirozini taqdim etadi.
                   </p>
-                  <button
+                  <motion.button
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.98 }}
                     type="button"
                     disabled={isLoadingChallenge}
                     onClick={onStartCourtHearing}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#1D4ED8] hover:bg-blue-600 rounded-xl transition-colors cursor-pointer disabled:opacity-60"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#0F766E] hover:bg-[#115E59] rounded-xl transition-colors cursor-pointer disabled:opacity-60"
                   >
                     {isLoadingChallenge ? (
                       <>
@@ -299,7 +307,7 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
                         <span>Sud majlisini boshlash</span>
                       </>
                     )}
-                  </button>
+                  </motion.button>
                 </div>
               ) : !courtSession.verdictIssued ? (
                 <form onSubmit={handleSubmit} className="space-y-3">
@@ -315,7 +323,7 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
                     value={defenseText}
                     onChange={(e) => setDefenseText(e.target.value)}
                     placeholder="Hurmatli sud raisi, barcha raqamli dalillar JPK 81 va 204²-moddalar asosida SHA-256 xesh bilan muhrlangan..."
-                    className="w-full rounded-xl bg-[#070E1C] border border-cyan-500/35 px-3.5 py-2.5 text-xs text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    className="w-full rounded-xl bg-[#0D1A1B] border border-teal-500/35 px-3.5 py-2.5 text-xs text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
                   />
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <button
@@ -323,18 +331,21 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
                       onClick={() =>
                         setDefenseText(
                           isKnifeNoteCase
-                            ? 'Hurmatli sud raisi! Smart-Lock #4821 elektron kirish jurnali (21:14–21:38) va restoran kassa kamerasi (21:22) yozuvlari O‘zR JPK 204²-moddaga muvofiq SHA-256 nazorat xeshi bilan rasmiylashtirilgan, Dalil_Pichoq (№ 2026/11-418) va Dalil_Xat (№ 2026/11-419) xulosalari gumonlanuvchi aybini to‘liq tasdiqlaydi. JK 97-modda 1-qismi bo‘yicha ayblovni tasdiqlashingizni so‘rayman.'
-                            : 'Hurmatli sud raisi! Tergov jarayonida to‘plangan raqamli dalillar zanjiri uzluksiz: 19-noyabr soat 14:15 da 42 500 000 so‘m 8600****9104 kartasiga o‘tgan, IP 185.139.137.44, IMEI 354892104491820 va ATM #412 kamerasi JPK 81 va 204²-moddalari asosida SHA-256 bilan tasdiqlangan. JK 168-modda 3-qismi bo‘yicha ayblovni tasdiqlashingizni so‘rayman.'
+                            ? `Hurmatli sud raisi! ${activeCase.caseNumber}-sonli jinoyat ishi bo‘yicha Smart-Lock #4821 elektron kirish jurnali (21:14–21:38) va restoran kassa kamerasi (21:22) yozuvlari O‘zR JPK 204²-moddaga muvofiq SHA-256 nazorat xeshi bilan rasmiylashtirilgan, Dalil_Pichoq (№ 2026/11-418) va Dalil_Xat (№ 2026/11-419) xulosalari gumonlanuvchi ${activeCase.suspectName} aybini to‘liq tasdiqlaydi. JK 97-modda 1-qismi bo‘yicha ayblovni tasdiqlashingizni so‘rayman.`
+                            : activeCase.isDefaultCase
+                              ? 'Hurmatli sud raisi! Tergov jarayonida to‘plangan raqamli dalillar zanjiri uzluksiz: 19-noyabr soat 14:15 da 42 500 000 so‘m 8600****9104 kartasiga o‘tgan, IP 185.139.137.44, IMEI 354892104491820 va ATM #412 kamerasi JPK 81 va 204²-moddalari asosida SHA-256 bilan tasdiqlangan. JK 168-modda 3-qismi bo‘yicha ayblovni tasdiqlashingizni so‘rayman.'
+                              : `Hurmatli sud raisi! ${activeCase.caseNumber}-sonli «${activeCase.title}» ishi bo‘yicha gumonlanuvchi ${activeCase.suspectName}ga oid barcha raqamli va hujjatli dalillar O‘zR JPK 81, 95¹ va 204²-moddalari talablariga muvofiq rasmiylashtirilgan. ${activeCase.expectedJkLabel} bo‘yicha ayblovni tasdiqlashingizni so‘rayman.`
                         )
                       }
-                      className="text-xs font-semibold text-cyan-300 hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-teal-300 hover:underline cursor-pointer"
                     >
                       Namuna raddiyani to‘ldirish
                     </button>
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
                       type="submit"
                       disabled={isLoadingVerdict || defenseText.trim().length < 15}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#1D4ED8] hover:bg-blue-600 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#0F766E] hover:bg-[#115E59] rounded-xl transition-colors cursor-pointer disabled:opacity-50"
                     >
                       {isLoadingVerdict ? (
                         <>
@@ -347,7 +358,7 @@ export const Step6VirtualCourt: React.FC<Step6VirtualCourtProps> = ({
                           <span>Raddiya va Hukm</span>
                         </>
                       )}
-                    </button>
+                    </motion.button>
                   </div>
                 </form>
               ) : (

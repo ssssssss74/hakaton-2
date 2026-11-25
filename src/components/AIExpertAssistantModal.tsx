@@ -28,27 +28,34 @@ export const AIExpertAssistantModal: React.FC<AIExpertAssistantModalProps> = ({
   const fetchStandardAnalysis = async () => {
     setLoading(true);
     try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Offline mode');
+      }
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 2200);
       const res = await fetch('/api/ai-expert-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           pinnedClues: state.pinnedClueIds,
           currentStep: state.currentStep,
           hoursUsed: state.hoursUsed,
           engine: state.aiEngine,
         }),
-      });
+      }).finally(() => window.clearTimeout(timer));
 
-      if (!res.ok) throw new Error("AI tahlil serverida xatolik");
+      const ct = res.headers.get('content-type') || '';
+      if (!res.ok || !ct.includes('application/json')) throw new Error("AI tahlil serverida xatolik");
       const data = await res.json();
       setAnalysis(data);
-    } catch (err: any) {
+    } catch {
       setAnalysis({
         strengthPercentage: Math.min(95, 45 + state.pinnedClueIds.length * 15),
-        prosecutorVerdict: `Tergov harakatlari JPK talablariga asosan olib borilmoqda (${state.aiEngine.toUpperCase()} rejimi).`,
-        tacticalAdvice: "Gumonlanuvchi so‘roq qilinayotganda IP manzil va IMEI raqamlarini asosiy dalil sifatida qo‘llang.",
-        jpkGuidance: "JPK 81, 95 va 96-moddalar talablariga qat’iy rioya qiling.",
-        source: state.aiEngine,
+        prosecutorVerdict: `Tergov harakatlari JPK talablariga asosan olib borilmoqda (${state.aiEngine.toUpperCase()} lokal tahlil rejimi).`,
+        tacticalAdvice: "Gumonlanuvchi so‘roq qilinayotganda IP manzil, Smart-Lock va IMEI raqamlarini asosiy dalil sifatida qo‘llang.",
+        jpkGuidance: "JPK 81, 95¹, 96 va 204²-moddalar talablariga qat’iy rioya qiling.",
+        source: `${state.aiEngine}-local`,
       });
     } finally {
       setLoading(false);
@@ -58,19 +65,26 @@ export const AIExpertAssistantModal: React.FC<AIExpertAssistantModalProps> = ({
   const fetchAntigravityAnalysis = async () => {
     setLoading(true);
     setAgentSteps([]);
-    setStatusText('Antigravity xavfsiz Linux sandboshi yuklanmoqda...');
+    setStatusText('Antigravity kiber-kriminalistik tahlil ishga tushmoqda...');
     try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Offline mode');
+      }
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 2200);
       const res = await fetch('/api/antigravity/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           pinnedClues: state.pinnedClueIds,
           currentStep: state.currentStep,
           hoursUsed: state.hoursUsed,
         }),
-      });
+      }).finally(() => window.clearTimeout(timer));
 
-      if (!res.ok) throw new Error("Antigravity server xatosi");
+      const ct = res.headers.get('content-type') || '';
+      if (!res.ok || !ct.includes('text/event-stream')) throw new Error("Antigravity server xatosi");
 
       const reader = res.body?.getReader();
       if (!reader) throw new Error("Stream o'qib bo'lmadi");

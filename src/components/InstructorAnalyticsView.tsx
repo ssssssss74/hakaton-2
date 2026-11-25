@@ -20,6 +20,7 @@ import { CustomCase, SimulationState } from '../types/simulation';
 interface InstructorAnalyticsViewProps {
   state: SimulationState;
   onAddCustomCase: (newCase: CustomCase) => void;
+  onActivateCase: (caseId: string, navigateToInvestigation?: boolean) => void;
 }
 
 const SIX_COMPETENCIES = [
@@ -58,6 +59,7 @@ const TOP_THREE_MISTAKES = [
 export const InstructorAnalyticsView: React.FC<InstructorAnalyticsViewProps> = ({
   state,
   onAddCustomCase,
+  onActivateCase,
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [title, setTitle] = useState('');
@@ -393,24 +395,40 @@ export const InstructorAnalyticsView: React.FC<InstructorAnalyticsViewProps> = (
           </h3>
         </div>
         <div className="divide-y divide-slate-100">
-          {state.customCases.map((c: CustomCase) => (
-            <div key={c.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-500">
-                  <span>{c.caseNumber}</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="font-semibold text-[#1D4ED8]">{c.category}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{c.difficulty}</span>
+          {state.customCases.map((c: CustomCase) => {
+            const isActive = state.activeCaseId === c.id;
+            return (
+              <div key={c.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-500">
+                    <span>{c.caseNumber}</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-semibold text-[#1D4ED8]">{c.category}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{c.difficulty}</span>
+                  </div>
+                  <div className="text-sm font-bold text-[#0F172A]">{c.title}</div>
+                  <p className="text-xs text-slate-600 line-clamp-1">{c.summary102}</p>
                 </div>
-                <div className="text-sm font-bold text-[#0F172A]">{c.title}</div>
-                <p className="text-xs text-slate-600 line-clamp-1">{c.summary102}</p>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs font-mono text-slate-400 tabular-nums">
+                    {c.createdAt}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onActivateCase(c.id, true)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-50 text-[#059669] border border-emerald-200 hover:bg-emerald-100'
+                        : 'bg-[#1D4ED8] text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {isActive ? 'Faol kazus (Ochish)' : 'Simulyatorda ochish'}
+                  </button>
+                </div>
               </div>
-              <span className="text-xs font-mono text-slate-400 shrink-0 tabular-nums">
-                Qo‘shilgan: {c.createdAt}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
