@@ -157,6 +157,12 @@ export function evaluateInterrogationFallback(
     '14:19',
     'sergeli',
     'phishing',
+    'orion_verify_bot',
+    'telegram',
+    'faradey',
+    '204',
+    'xesh',
+    'sha-256',
     'havola',
     'ekspertiza',
     '21:22',
@@ -170,9 +176,23 @@ export function evaluateInterrogationFallback(
     'xat',
     '2026/11-418',
     '2026/11-419',
+    '2026/11-420',
+    '2026/11-421',
   ];
 
-  const knifeNoteAlibiTriggers = ['21:22', '21:14', '21:38', '4821', 'smart-lock', 'smart lock', 'restoran'];
+  const knifeNoteAlibiTriggers = [
+    '21:22',
+    '21:14',
+    '21:38',
+    '4821',
+    'smart-lock',
+    'smart lock',
+    'restoran',
+    'pichoq',
+    'xat',
+    '2026/11-418',
+    '2026/11-419',
+  ];
   const citesKnifeNoteAlibi = knifeNoteAlibiTriggers.some((kw) => q.includes(kw));
 
   const openLawfulKeywords = [
@@ -197,12 +217,12 @@ export function evaluateInterrogationFallback(
     return {
       trafficLight: 'red',
       scoreDelta: -10,
-      coachTitle: "Qizil (JPK xavfi!)",
+      coachTitle: 'Qizil (JPK xavfi!)',
       coachExplanation:
-        "Savolda bosim o'tkazish yoki yo'naltiruvchi ohang mavjud. Tergovchi aybsizlik prezumpsiyasiga amal qilishi va faktlarga tayangan xolis savol berishi shart.",
-      jpkReference: 'JPK 23, 96-moddalar',
+        'Savolda bosim o‘tkazish yoki yo‘naltiruvchi ohang mavjud. Tergovchi aybsizlik prezumpsiyasiga amal qilishi va faktlarga tayangan xolis savol berishi shart.',
+      jpkReference: 'O‘zR JPK 23, 96-moddalar',
       suspectReply:
-        "Menga bosim o'tkazmang! Himoyachim ishtirokida gapiraman, men hali aybdor deb topilmaganman va bunday ayblovni rad etaman.",
+        'Menga bosim o‘tkazmang! Himoyachim ishtirokida gapiraman, men hali aybdor deb topilmaganman va bunday ayblovni rad etaman.',
       alibiContradicted: false,
     };
   }
@@ -211,27 +231,27 @@ export function evaluateInterrogationFallback(
     return {
       trafficLight: 'green',
       scoreDelta: 10,
-      coachTitle: "Yashil (Alibi fosh etildi!)",
+      coachTitle: 'Yashil (2-kazus alibisi fosh etildi!)',
       coachExplanation:
-        "A’lo darajadagi yuzlashtirish! Soat 21:22 dagi restoran kassa kamerasi va 21:14–21:38 oralig‘idagi Smart-Lock PIN #4821 jurnali o‘rtasidagi ziddiyat gumonlanuvchining yolg‘on alibisini to‘liq barbod qildi.",
-      jpkReference: 'JPK 95¹, 96, 111, 180-moddalar',
+        'A’lo darajadagi yuzlashtirish! Soat 21:22 dagi restoran kassa kamerasi tasviri, 21:14–21:38 oralig‘idagi Smart-Lock #4821 elektron qulf jurnali hamda № 2026/11-418 va № 2026/11-419 ekspertiza xulosalari gumonlanuvchining yolg‘on alibisini to‘liq barbod qildi.',
+      jpkReference: 'O‘zR JPK 95¹, 96, 111, 204²-moddalar',
       suspectReply:
-        "To‘xtab turing... Smart-Lock #4821 kodi faqat menda bor edi, lekin soat 21:22 dagi restoran chekini tanishimga to‘latgan edim... Ha, 21:14 da xonadonga kirganman, lekin advokatim kelmaguncha boshqa tafsilot aytmayman.",
+        'To‘xtab turing... Smart-Lock #4821 kodi faqat menda bor edi, lekin soat 21:22 dagi restoran to‘lovini tanishimga qildirgan edim... Ha, 21:14 da 47-xonadonga kirganman, lekin himoyachim ishtirokisiz boshqa tafsilot bermayman.',
       alibiContradicted: true,
     };
   }
 
   if (citesEvidence) {
-    if (twistActive) {
+    if (twistActive || q.includes('185.139') || q.includes('orion_verify_bot') || q.includes('412')) {
       return {
         trafficLight: 'green',
         scoreDelta: 10,
-        coachTitle: "Yashil (To'g'ri taktika)",
+        coachTitle: 'Yashil (1-kazus raqamli dalil bilan fosh etildi!)',
         coachExplanation:
-          "Ajoyib taktika! Siz gumonlanuvchining yolg'on alibisini aniq raqamli dalil (billing / IP / bankomat yozuvi) bilan fosh etdingiz.",
-        jpkReference: 'JPK 96, 111-moddalar',
+          'Ajoyib taktika! Siz gumonlanuvchining yolg‘on alibisini aniq raqamli dalillar — IP 185.139.137.44, @orion_verify_bot loglari, IMEI 354892104491820 billingi va ATM #412 yozuvi bilan fosh etdingiz.',
+        jpkReference: 'O‘zR JPK 96, 111, 204²-moddalar',
         suspectReply:
-          "To'xtab turing... ha, mayli, rostini aytaman: soat 14:15 da Yunusobodda edim. Sergeliga keyinroq borganman. Havolani ham Telegramdagi tanishim bilan tayyorlagan edik, lekin pulning katta qismi hali kartada turibdi.",
+          'To‘xtab turing... ha, rostini aytaman: soat 14:15 da Yunusobodda edim, Sergeliga keyinroq borganman. Phishing sahifasi va @orion_verify_bot ham mening tizimimdan boshqarilgan, 8600****9104 kartadagi mablag‘ning bir qismi hali saqlanib turibdi.',
         alibiContradicted: true,
       };
     }
@@ -239,12 +259,12 @@ export function evaluateInterrogationFallback(
     return {
       trafficLight: 'green',
       scoreDelta: 10,
-      coachTitle: "Yashil (To'g'ri taktika)",
+      coachTitle: 'Yashil (To‘g‘ri taktika)',
       coachExplanation:
-        "Dalillarga asoslangan aniq va qonuniy savol berildi. Bunday taktika gumonlanuvchini faktlar oldida izoh berishga undaydi.",
-      jpkReference: 'JPK 96-modda',
+        'Dalillarga asoslangan aniq va qonuniy savol berildi. Bunday taktika gumonlanuvchini raqamli faktlar oldida izoh berishga undaydi.',
+      jpkReference: 'O‘zR JPK 96, 204²-moddalar',
       suspectReply:
-        "Ha, u karta mening nomimda, lekin telefonim ba'zan ofisdagi boshqa yigitlarda ham qolardi. Bankomat oldidan o'tgan bo'lishim mumkin, aniq eslolmayapman.",
+        'Ha, 8600****9104 karta mening nomimda, lekin telefonim ba’zan ofisdagi tanishlarim qo‘lida ham qolardi. Yunusobod bankomati oldidan o‘tgan bo‘lishim mumkin, aniq eslolmayapman.',
       alibiContradicted: false,
     };
   }

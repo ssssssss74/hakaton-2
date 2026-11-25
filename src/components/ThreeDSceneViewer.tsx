@@ -14,6 +14,7 @@ import {
   Maximize2,
   Minimize2,
   RotateCw,
+  ScanLine,
   ShieldAlert,
   Upload,
   X,
@@ -24,11 +25,14 @@ import {
   ForensicEvidenceInfo,
   resolveEvidenceInfo,
 } from '../scene/evidenceCatalog';
+import { DigitalCustodyPassport } from './DigitalCustodyPassport';
 
 interface ThreeDSceneViewerProps {
   pinnedClues: string[];
   onTogglePinClue: (clueId: string) => void;
   fullViewport?: boolean;
+  chainBroken?: boolean;
+  investigatorName?: string;
 }
 
 // Pre-allocated math helpers (zero GC inside animation loop)
@@ -69,10 +73,12 @@ function findDalilName(obj: THREE.Object3D | null): string | null {
   return null;
 }
 
-export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
+const ThreeDSceneViewerInner: React.FC<ThreeDSceneViewerProps> = ({
   pinnedClues,
   onTogglePinClue,
   fullViewport = false,
+  chainBroken = false,
+  investigatorName,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasMountRef = useRef<HTMLDivElement | null>(null);
@@ -82,11 +88,23 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
   const [hoveredEvidenceName, setHoveredEvidenceName] = useState<string | null>(null);
   const [isPointerLocked, setIsPointerLocked] = useState(false);
   const [flashlightOn, setFlashlightOn] = useState(true);
+  const [uvScannerOn, setUvScannerOn] = useState(false);
   const [dockCollapsed, setDockCollapsed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [customModelLabel, setCustomModelLabel] = useState<string | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
   const [expertiseModalOpen, setExpertiseModalOpen] = useState(false);
+
+  // Release pointer lock automatically whenever any evidence card or expertise modal opens
+  useEffect(() => {
+    if (selectedEvidence || expertiseModalOpen) {
+      try {
+        document.exitPointerLock?.();
+      } catch {
+        // Ignore if pointer lock is not active
+      }
+    }
+  }, [selectedEvidence, expertiseModalOpen]);
 
   // Refs bridging React UI controls into the single stable WebGL lifecycle
   const flashlightRef = useRef(flashlightOn);
@@ -747,9 +765,35 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
         {modelError && <div className="mt-1 text-[11px] text-red-400">{modelError}</div>}
       </div>
 
+      {/* UV / Lazer Skener HUD Overlay */}
+      {uvScannerOn && (
+        <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/10 via-indigo-600/12 to-emerald-500/10" />
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(34,211,238,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.35) 1px, transparent 1px)',
+              backgroundSize: '42px 42px',
+            }}
+          />
+          {/* Corner Tactical HUD Brackets */}
+          <div className="absolute top-3 left-3 w-7 h-7 border-t-2 border-l-2 border-cyan-400" />
+          <div className="absolute top-3 right-3 w-7 h-7 border-t-2 border-r-2 border-cyan-400" />
+          <div className="absolute bottom-3 left-3 w-7 h-7 border-b-2 border-l-2 border-cyan-400" />
+          <div className="absolute bottom-3 right-3 w-7 h-7 border-b-2 border-r-2 border-cyan-400" />
+          {/* Top-Right UV Mode Status Readout */}
+          <div className="absolute top-3 right-12 px-3 py-1.5 rounded-lg bg-[#050C1B]/90 border border-cyan-400/60 text-cyan-200 font-mono text-[11px] font-semibold shadow-lg">
+            UV / LAZER SKANER FAOL · 365 nm SPEKTR · O‘zR JPK 137, 204²
+          </div>
+          {/* Sweeping Laser Line */}
+          <div className="animate-uv-laser absolute left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_22px_5px_rgba(34,211,238,0.85)]" />
+        </div>
+      )}
+
       {/* Selected Evidence Forensic Card (Bottom-Right, only when a Dalil_* item is clicked) */}
       {selectedEvidence && (
-        <div className="absolute bottom-24 right-4 z-20 w-[min(340px,calc(100%-32px))] bg-[#111827] border border-slate-700 rounded-xl p-4 text-slate-100 shadow-2xl space-y-3">
+        <div className="absolute bottom-24 right-4 z-20 w-[min(360px,calc(100%-32px))] max-h-[72vh] overflow-y-auto bg-[#0D1628] border border-cyan-500/45 rounded-xl p-4 text-slate-100 shadow-2xl space-y-3">
           <div className="flex items-start justify-between gap-2">
             <div>
               <div className="inline-block px-2 py-0.5 rounded bg-blue-950 border border-blue-700/60 text-blue-300 text-[10px] font-mono mb-1">
@@ -780,22 +824,25 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
             ))}
           </ul>
 
-          <div className="bg-slate-950 border border-slate-800 rounded-lg p-2">
-            <div className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">
-              SHA-256 Butunlik Xeshi
-            </div>
-            <div className="font-mono text-[9px] text-emerald-400 break-all mt-0.5">
-              {selectedEvidence.hash}
-            </div>
-          </div>
+          <DigitalCustodyPassport
+            title={selectedEvidence.title}
+            hash={selectedEvidence.hash}
+            passport={selectedEvidence.custodyPassport}
+            chainBroken={chainBroken}
+            investigatorOverride={investigatorName}
+            compact
+          />
 
           {selectedEvidence.expertiseReport && (
             <button
               type="button"
-              onClick={() => setExpertiseModalOpen(true)}
-              className="w-full py-2 px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              onClick={() => {
+                document.exitPointerLock?.();
+                setExpertiseModalOpen(true);
+              }}
+              className="w-full py-2 px-3 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <FileText className="w-3.5 h-3.5 text-amber-400" />
+              <FileText className="w-3.5 h-3.5 text-amber-300" />
               <span>Ekspertiza xulosasi ({selectedEvidence.expertiseReport.reportNumber})</span>
             </button>
           )}
@@ -829,8 +876,8 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
 
       {/* Official Forensic Expertise Report Modal (No backdrop-filter over WebGL) */}
       {expertiseModalOpen && selectedEvidence?.expertiseReport && (
-        <div className="absolute inset-0 z-30 bg-slate-950/85 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg max-h-[85%] overflow-y-auto bg-[#0F172A] border border-slate-700 rounded-2xl p-5 text-slate-100 shadow-2xl space-y-4">
+        <div className="absolute inset-0 z-30 bg-slate-950/88 flex items-center justify-center p-4">
+          <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto bg-[#0D1628] border border-cyan-500/45 rounded-2xl p-5 text-slate-100 shadow-2xl space-y-4">
             <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
               <div>
                 <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[10px] font-mono">
@@ -853,6 +900,14 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            <DigitalCustodyPassport
+              title={selectedEvidence.title}
+              hash={selectedEvidence.hash}
+              passport={selectedEvidence.custodyPassport}
+              chainBroken={chainBroken}
+              investigatorOverride={investigatorName}
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
               <div className="bg-slate-900 border border-slate-800 rounded-lg p-2.5">
@@ -998,13 +1053,28 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
               onClick={() => setFlashlightOn((v) => !v)}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border cursor-pointer ${
                 flashlightOn
-                  ? 'bg-amber-500/20 border-amber-500/60 text-amber-300'
-                  : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white'
+                  ? 'bg-amber-500/20 border-amber-400/60 text-amber-200'
+                  : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white'
               }`}
               title="Fonarikni yoqish / o'chirish (F)"
             >
               <Flashlight className="w-3.5 h-3.5" />
               <span className="hidden md:inline">Fonarik</span>
+            </button>
+
+            {/* UV / Laser Scanner Toggle */}
+            <button
+              type="button"
+              onClick={() => setUvScannerOn((v) => !v)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
+                uvScannerOn
+                  ? 'bg-cyan-500/25 border-cyan-300 text-cyan-100 shadow-sm shadow-cyan-500/30'
+                  : 'bg-slate-900 border-slate-700 text-cyan-200 hover:border-cyan-400/60 hover:text-white'
+              }`}
+              title="UV va lazer skaner rejimini yoqish / o'chirish"
+            >
+              <ScanLine className="w-3.5 h-3.5" />
+              <span>UV / Lazer Skener</span>
             </button>
 
             {/* Upload custom Blender xona.glb */}
@@ -1059,11 +1129,171 @@ export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = ({
 
       {/* Subtle Bottom-Left Hint when no evidence is open */}
       {!selectedEvidence && !dockCollapsed && (
-        <div className="hidden xl:flex items-center gap-1.5 absolute bottom-4 left-4 z-10 px-2.5 py-1.5 rounded-lg bg-slate-950/85 border border-slate-800 text-[11px] text-slate-400 pointer-events-none">
-          <Eye className="w-3.5 h-3.5 text-blue-400" />
+        <div className="hidden xl:flex items-center gap-1.5 absolute bottom-4 left-4 z-10 px-2.5 py-1.5 rounded-lg bg-slate-950/85 border border-slate-800 text-[11px] text-slate-300 pointer-events-none">
+          <Eye className="w-3.5 h-3.5 text-cyan-400" />
           <span>Sariq raqamli dalillar ustiga bosing</span>
         </div>
       )}
     </div>
   );
 };
+
+/* ========================================================================= */
+/* 2D Fallback Evidence List + React ErrorBoundary (WebGL resilience)        */
+/* ========================================================================= */
+const FallbackTwoDEvidenceView: React.FC<ThreeDSceneViewerProps> = ({
+  pinnedClues,
+  onTogglePinClue,
+  chainBroken = false,
+  investigatorName,
+}) => {
+  const [openReportId, setOpenReportId] = useState<string | null>(null);
+  const allEvidence = Object.values(FORENSIC_EVIDENCE_CATALOG);
+  const activeReportEvidence = allEvidence.find((e) => e.id === openReportId) || null;
+
+  return (
+    <div className="rounded-2xl bg-[#0B1221] border border-cyan-500/35 p-5 sm:p-6 text-slate-100 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+        <div>
+          <div className="text-[11px] font-mono text-amber-300">
+            ZAXIRA 2D KO‘ZDAN KECHIRISH REJIMI (WebGL mavjud emas)
+          </div>
+          <h3 className="text-base font-bold text-slate-100 mt-0.5">
+            Hodisa joyi dalillari va rasmiy sud ekspertiza xulosalari
+          </h3>
+        </div>
+        <span className="font-mono text-xs text-cyan-300 tabular-nums">
+          {allEvidence.length} ta ashyoviy va raqamli dalil
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {allEvidence.map((ev) => {
+          const isPinned = pinnedClues.includes(ev.cluePinId);
+          return (
+            <div
+              key={ev.id}
+              className="bg-[#0E172A] border border-slate-700/80 rounded-xl p-4 flex flex-col justify-between gap-3"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+                  <span className="text-amber-300 font-bold">#{ev.markerNumber} · {ev.id}</span>
+                  <span className="text-cyan-300">{ev.jpkRef}</span>
+                </div>
+                <div className="text-sm font-bold text-slate-100">{ev.title}</div>
+                <p className="text-xs text-slate-300 leading-relaxed">{ev.desc}</p>
+                <DigitalCustodyPassport
+                  title={ev.title}
+                  hash={ev.hash}
+                  passport={ev.custodyPassport}
+                  chainBroken={chainBroken}
+                  investigatorOverride={investigatorName}
+                  compact
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                {ev.expertiseReport && (
+                  <button
+                    type="button"
+                    onClick={() => setOpenReportId(ev.id)}
+                    className="flex-1 py-2 px-2.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-semibold cursor-pointer"
+                  >
+                    Ekspertiza ({ev.expertiseReport.reportNumber})
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onTogglePinClue(ev.cluePinId)}
+                  className={`py-2 px-3 rounded-lg text-xs font-semibold cursor-pointer ${
+                    isPinned
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-[#1D4ED8] hover:bg-blue-600 text-white'
+                  }`}
+                >
+                  {isPinned ? 'Doskada ✓' : 'Doskaga'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {activeReportEvidence?.expertiseReport && (
+        <div className="fixed inset-0 z-50 bg-slate-950/85 flex items-center justify-center p-4">
+          <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto bg-[#0D1628] border border-cyan-500/45 rounded-2xl p-5 text-slate-100 shadow-2xl space-y-4">
+            <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+              <div>
+                <div className="text-xs font-mono text-amber-300">
+                  EKSPERTIZA XULOSASI {activeReportEvidence.expertiseReport.reportNumber}
+                </div>
+                <h4 className="text-base font-bold text-white mt-1">
+                  {activeReportEvidence.expertiseReport.expertiseType}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpenReportId(null)}
+                className="p-1.5 rounded-lg text-slate-300 hover:bg-slate-800 cursor-pointer"
+                aria-label="Yopish"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <DigitalCustodyPassport
+              title={activeReportEvidence.title}
+              hash={activeReportEvidence.hash}
+              passport={activeReportEvidence.custodyPassport}
+              chainBroken={chainBroken}
+              investigatorOverride={investigatorName}
+            />
+            <ul className="space-y-2 text-xs text-slate-200">
+              {activeReportEvidence.expertiseReport.findings.map((f, i) => (
+                <li key={i} className="bg-slate-900 border border-slate-800 rounded-lg p-2.5">
+                  {i + 1}. {f}
+                </li>
+              ))}
+            </ul>
+            <div className="bg-emerald-950/50 border border-emerald-500/40 rounded-xl p-3 text-xs text-emerald-100">
+              {activeReportEvidence.expertiseReport.conclusion}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface ThreeDErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ThreeDErrorBoundary extends React.Component<
+  { fallbackProps: ThreeDSceneViewerProps; children: React.ReactNode },
+  ThreeDErrorBoundaryState
+> {
+  constructor(props: { fallbackProps: ThreeDSceneViewerProps; children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ThreeDErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.warn('3D Sahna xatosi tufayli 2D zaxira dalillar rejimi faollashtirildi:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <FallbackTwoDEvidenceView {...this.props.fallbackProps} />;
+    }
+    return this.props.children;
+  }
+}
+
+export const ThreeDSceneViewer: React.FC<ThreeDSceneViewerProps> = (props) => (
+  <ThreeDErrorBoundary fallbackProps={props}>
+    <ThreeDSceneViewerInner {...props} />
+  </ThreeDErrorBoundary>
+);

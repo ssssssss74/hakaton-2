@@ -1,16 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { STEP_DEFINITIONS } from '../data/caseData';
-import { ComputedMetrics, DecisionFormState, SimulationState } from '../types/simulation';
+import { ComputedMetrics, DecisionFormState, NavView, SimulationState } from '../types/simulation';
 import { Step1Dispatch } from './steps/Step1Dispatch';
 import { Step2EvidenceBoard } from './steps/Step2EvidenceBoard';
 import { Step3RequestsAndDecision } from './steps/Step3RequestsAndDecision';
 import { Step4Interrogation } from './steps/Step4Interrogation';
 import { Step5ProsecutorReview } from './steps/Step5ProsecutorReview';
 import { Step6VirtualCourt } from './steps/Step6VirtualCourt';
-import { NavView } from '../types/simulation';
-import { Sparkles } from 'lucide-react';
+import {
+  Scale,
+  Check,
+  ArrowRight,
+  Presentation,
+  ClipboardList,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { AIExpertAssistantModal } from './AIExpertAssistantModal';
-import { useState } from 'react';
 
 interface InvestigationWorkspaceProps {
   state: SimulationState;
@@ -22,6 +31,7 @@ interface InvestigationWorkspaceProps {
   onSelectStep1Decision: (optionId: string) => void;
   onToggleEvidenceClue: (clueId: string) => void;
   onCompleteStep2: () => void;
+  onSolveDfir: (caseId: 'case1' | 'case2', artifact: string) => void;
   onSendAgencyRequest: (reqId: string) => void;
   onUpdateDecisionForm: (patch: Partial<DecisionFormState>) => void;
   onRunJpkAudit: () => void;
@@ -49,6 +59,7 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
   onSelectStep1Decision,
   onToggleEvidenceClue,
   onCompleteStep2,
+  onSolveDfir,
   onSendAgencyRequest,
   onUpdateDecisionForm,
   onRunJpkAudit,
@@ -67,6 +78,18 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
 }) => {
   const currentStep = state.currentStep;
   const [showAiModal, setShowAiModal] = useState(false);
+  const [showJournalDrawer, setShowJournalDrawer] = useState(false);
+
+  const completedCount = [
+    state.step1Completed,
+    state.step2Completed,
+    state.step3Completed,
+    state.step4Completed,
+    state.step5Completed,
+    state.step6Completed,
+  ].filter(Boolean).length;
+
+  const progressPct = Math.round((completedCount / 6) * 100);
 
   const nextStepHandler = () => {
     if (currentStep < 6) {
@@ -76,29 +99,39 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* AI Expert Assistant Bar */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-blue-900 via-slate-900 to-indigo-950 text-white p-4 rounded-xl shadow-lg border border-blue-500/30">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/30 text-blue-300">
-            <Sparkles className="w-5 h-5 animate-pulse" />
+      {/* Executive AI Legal Advisor Command Strip */}
+      <div className="bg-[#0B1221] text-white px-5 py-4 rounded-2xl border border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-400/30 text-amber-300 flex items-center justify-center shrink-0">
+            <Scale className="w-5 h-5" />
           </div>
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-200">
-              E-Tergov AI — Kriptografik va JPK Yordamchisi
-            </h3>
-            <p className="text-[11px] text-slate-300">
-              Joriy tergov holatingiz bo‘yicha sun’iy intellekt prokuror ekspert xulosasini oling.
+          <div className="min-w-0">
+            <div className="text-xs font-semibold text-amber-300">
+              E-Tergov AI · Prokuror va JPK maslahatchisi
+            </div>
+            <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
+              Joriy tergov bosqichi va to‘plangan dalillar bo‘yicha real vaqtda huquqiy audit xulosasini oling.
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowAiModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors shadow-lg shadow-blue-600/40 cursor-pointer whitespace-nowrap"
-        >
-          <Sparkles className="w-4 h-4" />
-          <span>AI Ekspert Tahlili</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => onNavigate('presentation')}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+          >
+            <Presentation className="w-3.5 h-3.5 text-amber-400" />
+            <span>Planshet</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAiModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1D4ED8] hover:bg-blue-600 text-white font-semibold text-xs transition-colors cursor-pointer whitespace-nowrap"
+          >
+            <span>AI Ekspert Tahlili</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {showAiModal && (
@@ -109,22 +142,119 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
         />
       )}
 
-      {/* Top Stepper — All 6 Steps Open for Free Navigation */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
-          <span>
-            Barcha 6 protsessual bosqich ochiq — taqdimot davomida istalgan bosqichga to‘g‘ridan-to‘g‘ri o‘ting
-          </span>
-          <button
-            type="button"
-            onClick={() => onNavigate('presentation')}
-            className="text-[#1D4ED8] hover:underline font-semibold whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            Taqdimot planshetiga qaytish →
-          </button>
+      {/* Top Stepper — Elevated 6-Step Connected Rail (All Steps Open) */}
+      <div className="surface-card rounded-2xl p-4 sm:p-5 space-y-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 text-slate-600">
+            <span className="font-semibold text-[#0F172A]">Protsessual marshrut</span>
+            <span aria-hidden="true" className="text-slate-300">·</span>
+            <span>Barcha 6 bosqich erkin o‘tish uchun ochiq</span>
+          </div>
+          <div className="flex items-center gap-3 font-mono tabular-nums text-slate-600">
+            <button
+              type="button"
+              onClick={() => setShowJournalDrawer((v) => !v)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-sans font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                showJournalDrawer
+                  ? 'bg-[#0B1221] border-[#0B1221] text-white'
+                  : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
+              }`}
+            >
+              <ClipboardList className="w-3.5 h-3.5 text-[#1D4ED8]" />
+              <span>Qarorlar jurnali ({state.timeline.length})</span>
+              {showJournalDrawer ? (
+                <ChevronUp className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5" />
+              )}
+            </button>
+            <span>Bajarildi: {completedCount}/6 ({progressPct}%)</span>
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <div className="flex items-center justify-between min-w-[700px] gap-2">
+
+        {/* Live Collapsible Qarorlar jurnali (Debriefing) */}
+        {showJournalDrawer && (
+          <div className="rounded-xl border border-slate-200 bg-slate-50/90 p-4 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200">
+              <div>
+                <div className="text-xs font-bold text-[#0F172A]">
+                  Qarorlar jurnali va protsessual xronologiya (Jonli nazorat)
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  Har bir tergov harakati vaqti, JPK moddasi va ball ta’siri bilan qayd etiladi
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] font-mono tabular-nums">
+                <span className="text-[#059669] font-semibold">
+                  To‘g‘ri: {state.timeline.filter((t) => t.status === 'green').length}
+                </span>
+                <span className="text-slate-300">|</span>
+                <span className="text-[#D97706] font-semibold">
+                  Ogohlantirish: {state.timeline.filter((t) => t.status === 'yellow').length}
+                </span>
+                <span className="text-slate-300">|</span>
+                <span className="text-[#DC2626] font-semibold">
+                  Xato: {state.timeline.filter((t) => t.status === 'red').length}
+                </span>
+              </div>
+            </div>
+
+            {state.timeline.length === 0 ? (
+              <div className="text-xs text-slate-500 py-2">
+                Hali qarorlar qayd etilmagan. 1-bosqichdan tergov harakatini bajaring.
+              </div>
+            ) : (
+              <div className="max-h-56 overflow-y-auto divide-y divide-slate-200/80 pr-1">
+                {state.timeline.map((ev) => (
+                  <div
+                    key={ev.id}
+                    className="py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                  >
+                    <div className="flex items-start gap-2 min-w-0">
+                      {ev.status === 'green' && (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
+                      )}
+                      {ev.status === 'yellow' && (
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#D97706] shrink-0 mt-0.5" />
+                      )}
+                      {ev.status === 'red' && (
+                        <XCircle className="w-3.5 h-3.5 text-[#DC2626] shrink-0 mt-0.5" />
+                      )}
+                      <div className="min-w-0">
+                        <div className="font-semibold text-[#0F172A] truncate">{ev.title}</div>
+                        <div className="text-[11px] text-slate-500 font-mono tabular-nums">
+                          {ev.step}-bosqich · {ev.timestampSim} · {ev.jpkRef}
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      className={`font-mono font-semibold tabular-nums shrink-0 ${
+                        ev.status === 'green'
+                          ? 'text-[#059669]'
+                          : ev.status === 'yellow'
+                            ? 'text-[#D97706]'
+                            : 'text-[#DC2626]'
+                      }`}
+                    >
+                      {ev.scoreDelta >= 0 ? `+${ev.scoreDelta}` : ev.scoreDelta} ball
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Visual Progress Line */}
+        <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-[#1D4ED8] to-[#059669] transition-all duration-300"
+            style={{ width: `${Math.max(8, progressPct)}%` }}
+          />
+        </div>
+
+        <div className="overflow-x-auto pb-0.5">
+          <div className="grid grid-cols-6 min-w-[720px] gap-2">
             {STEP_DEFINITIONS.map((step) => {
               const isCurrent = step.id === currentStep;
               const isCompleted =
@@ -140,27 +270,38 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
                   key={step.id}
                   type="button"
                   onClick={() => onSelectStep(step.id)}
-                  className={`flex-1 flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer ${
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all cursor-pointer border ${
                     isCurrent
-                      ? 'bg-blue-50 border border-blue-300 text-[#1D4ED8]'
+                      ? 'bg-[#0B1221] border-[#0B1221] text-white shadow-sm'
                       : isCompleted
-                        ? 'bg-emerald-50/60 border border-emerald-200 text-emerald-900 hover:bg-emerald-50'
-                        : 'bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-800'
+                        ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950 hover:bg-emerald-50'
+                        : 'bg-slate-50/70 border-slate-200 hover:bg-white hover:border-slate-300 text-slate-800'
                   }`}
                 >
                   <span
-                    className={`w-6 h-6 rounded-full text-xs font-mono font-semibold flex items-center justify-center shrink-0 ${
+                    className={`w-6 h-6 rounded-lg text-xs font-mono font-bold flex items-center justify-center shrink-0 ${
                       isCurrent
                         ? 'bg-[#1D4ED8] text-white'
                         : isCompleted
-                          ? 'bg-[#10B981] text-white'
-                          : 'bg-slate-200 text-slate-700'
+                          ? 'bg-[#059669] text-white'
+                          : 'bg-white border border-slate-200 text-slate-700'
                     }`}
                   >
-                    {step.id}
+                    {isCompleted && !isCurrent ? <Check className="w-3.5 h-3.5" /> : step.id}
                   </span>
                   <div className="min-w-0">
                     <div className="text-xs font-semibold truncate">{step.shortLabel}</div>
+                    <div
+                      className={`text-[10px] truncate ${
+                        isCurrent
+                          ? 'text-slate-300'
+                          : isCompleted
+                            ? 'text-emerald-700'
+                            : 'text-slate-500'
+                      }`}
+                    >
+                      {isCurrent ? 'Faol bosqich' : isCompleted ? 'Yakunlandi' : 'Ochiq'}
+                    </div>
                   </div>
                 </button>
               );
@@ -183,6 +324,7 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
           state={state}
           onToggleClue={onToggleEvidenceClue}
           onCompleteStep2={onCompleteStep2}
+          onSolveDfir={onSolveDfir}
           onNextStep={nextStepHandler}
         />
       )}

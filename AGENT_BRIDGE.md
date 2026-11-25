@@ -126,4 +126,28 @@ Ushbu fayl loyiha ustida birgalikda ishlaydigan **3 ta agent** — **Build Agent
   - `scripts/smoke-test.ts` va `package.json` dagi `test:smoke` qo‘shildi va ishga tushirildi: **9/9 tekshiruv muvaffaqiyatli (0 ta xato)**.
 - **Keyingi qadam / Kimga:** Barcha joriy sprint topshiriqlari yakunlandi (`@GEMINI` + `@ANTIGRAVITY` + `@BUILD-AGENT`). Istalgan vaqtda AI Studio’dan GitHub’ga push qilinishi mumkin.
 
+### [2026-11-25 06:25] — [BUILD-AGENT]
+- **Holat:** ✅ Bosh prokuror oldidagi jonli taqdimot (HMQA «Kiberxavfsizlikni huquqiy ta’minlash» magistratura talabalari) uchun 5 ta yuqori ta’sirli kriminalistika moduli to‘liq joriy etildi!
+- **Qilingan ishlar:**
+  1. **Raqamli dalil zanjiri pasporti (JPK 204² va 95¹-moddalar):** `src/components/DigitalCustodyPassport.tsx`, `src/scene/evidenceCatalog.ts`, `src/components/ThreeDSceneViewer.tsx` va `src/components/steps/Step2EvidenceBoard.tsx` — barcha 3D dalillar (`Dalil_Kompyuter`, `Dalil_Smartfon`, `Smart-Lock #4821` va b.) uchun nusxalanadigan SHA-256 xesh, olingan vaqt, mas’ul tergovchi, saqlash sharti va dinamik `MAQBUL DALIL` / `JPK 95¹-MODDA: DALIL MAQBUL EMAS!` muhri ulandi.
+  2. **Kiber-izlar xaritasi + Mini-DFIR:** `src/components/CyberTraceGraph.tsx` — 1-kazus (6 tugun) va 2-kazus (`CASE-02-KNIFE-NOTE`, 5 tugun) uchun interaktiv bog‘lanish grafi, JPK ahamiyati inspektor oynasi hamda `+10 bonus ball` beruvchi Mini-DFIR artefakt tekshiruvi (`185.139.137.44`, `21:22`, `#4821`) qo‘shildi.
+  3. **Qarorlar jurnali va O‘qituvchi analitikasi:** `src/components/InvestigationWorkspace.tsx`, `src/components/steps/Step6VirtualCourt.tsx` va `src/components/InstructorAnalyticsView.tsx` — jonli ochiladigan qarorlar jurnali, filtrlanadigan «Xatolar xaritasi», 6 ta kasbiy kompetensiya ko‘rsatkichlari va «Guruhda eng ko‘p uchraydigan 3 ta protsessual xato» (42% / 28% / 15%) bloklari qo‘shildi.
+  4. **1 klikda PDF / Chop etish:** `src/components/PrintableProtocolCertificate.tsx` va `src/index.css` (`@media print`) — O‘zR JPK normalariga mos oq qog‘oz ko‘rinishidagi rasmiy bayonnoma hamda QR-kodli HMQA malaka sertifikati yaratildi.
+  5. **3 daqiqalik jonli demo va Offline zaxira:** `src/components/PresentationTabletView.tsx`, `src/components/steps/Step4Interrogation.tsx`, `src/utils/scoring.ts` va `src/App.tsx` — 4 qadamli «Tezkor Demo Yo‘riqnomasi», «Demo namunasini to‘ldirish» tugmalari va tarmoq/API uzilganda 6.5 soniyali taymaut bilan avtomatik lokal zaxira baholash ulandi.
+- **Keyingi qadam / Kimga:** Yakuniy TypeScript + Vite (`compile_applet` va `lint_applet`) tekshiruvidan o‘tkazish.
+
+### [2026-11-25 06:44] — [BUILD-AGENT]
+- **Holat:** ✅ «Kiber-Kriminalistika Boshqaruv Markazi» UI/UX yangilanishi va Bosh prokuror oldidagi proyektorda jonli taqdimot paketi (8/8 bo‘lim) to‘liq bajarildi!
+- **Qilingan ishlar:**
+  1. **Kiber-markaz qobig‘i, kontrast va shriftlar:** `index.html` (`Inter` 400–700 + `JetBrains Mono`), `src/index.css` (dark forensic glassmorphism, taktik panjara, UV lazer / oqim / ekvalayzer / muhr animatsiyalari) va `src/components/Layout.tsx` (yuqori panelda 4 ta jonli «Simulyator Telemetriyasi» indikatori: E-Tergov API, IIV Daktilo-Baza, Markaziy Bank Antifrod, Lex.uz JK/JPK 2026).
+  2. **2 tabli Taqdimot Plansheti:** `src/components/PresentationTabletView.tsx` — 1-tabda O‘zbekiston rasmiy statistikasi (3,73 trln so‘m / 11 baravar, <8% Toshkent, 69 ming+ / 210 mlrd so‘m, PF-38 & JPK 204²), «Tergov xatolari oqibati vs E-Tergov Lab samarasi» jadvali va interaktiv «Samara Kalkulyatori» (Simulyatsiya modeli); 2-tabda 4 bosqichli 3 daqiqalik jonli demo xaritasi hamda xorijiy analoglar (Hydra UK, INTERPOL Virtual Academy, CyberDefenders) bilan taqqoslash.
+  3. **3D UV / Lazer Skener + ErrorBoundary + ExitPointerLock:** `src/components/ThreeDSceneViewer.tsx` — React `ErrorBoundary` (WebGL ishlamasa 2D zaxira dalillar ro‘yxati), «UV / Lazer Skener» HUD panjara va yuruvchi lazer chizig‘i, har bir modalda `document.exitPointerLock?.()` va JPK 204²/95¹ Dalil Zanjiri Pasporti.
+  4. **AI-So‘roq Jonli Poligraf + Ovozli Rejim:** `src/components/SuspectBiometricScanner.tsx` va `src/components/steps/Step4Interrogation.tsx` — 40–50% sariq / 88–95% qizil pulsatsiyali stress shkalasi, harakatlanuvchi audio ekvalayzer, `try/catch` himoyali «Ovozli so‘roq» hamda 1 kliklik 1- va 2-kazus demo savollari.
+  5. **Animatsiyali Kiber-izlar Xaritasi + Mini-DFIR:** `src/components/CyberTraceGraph.tsx` — `activeCaseId` bo‘yicha dinamik SVG oqim chiziqlari (`animate-flow-dash`) va `+10 bonus ball` beruvchi Mini-DFIR kvesti.
+  6. **3 ustunli Kinematografik Virtual Sud + `#printable-protocol` PDF:** `src/components/steps/Step6VirtualCourt.tsx` va `src/components/PrintableProtocolCertificate.tsx` — Chapda Prokuror (4 bandli chek-list), O‘rtada Sudya + «Dalillar Isbotlanganlik Darajasi (0–100%)» + rasmiy muhr animatsiyasi, O‘ngda Himoyachi (JPK 95¹ e’tirozi); `@media print` da faqat `#printable-protocol` toza oq qog‘ozda chop etiladi.
+  7. **Imlo va QA:** Barcha ko‘rinuvchi interfeys matnlari 100% o‘zbek lotin imlosida tozalandi, `LeaderboardView` va `InstructorAnalyticsView` sarlavhalari to‘q fondagi proyektor kontrastiga moslashtirildi.
+- **Keyingi qadam / Kimga:** `compile_applet` va `lint_applet` yakuniy tekshiruvi.
+
 <!-- Yangi xabarlarni shu qatordan pastga qo‘shing -->
+
+

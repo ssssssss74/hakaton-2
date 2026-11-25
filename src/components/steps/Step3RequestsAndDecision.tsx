@@ -57,7 +57,7 @@ export const Step3RequestsAndDecision: React.FC<Step3Props> = ({
   return (
     <div className="space-y-6">
       {/* Part 1: Inter-Agency Electronic Requests */}
-      <section className="bg-white border border-[#E2E8F0] rounded-xl p-6 space-y-5">
+      <section className="surface-card rounded-2xl p-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
           <div>
             <h2 className="text-lg font-bold text-[#0F172A]">
@@ -134,7 +134,7 @@ export const Step3RequestsAndDecision: React.FC<Step3Props> = ({
       </section>
 
       {/* Part 2: Procedural Document Constructor + JPK Audit */}
-      <section className="bg-white border border-[#E2E8F0] rounded-xl p-6 space-y-5">
+      <section className="surface-card rounded-2xl p-6 space-y-5">
         <div className="pb-3 border-b border-slate-100">
           <h3 className="text-base font-bold text-[#0F172A]">
             Protsessual hujjat konstruktori: «Jinoyat ishi qo‘zg‘atish to‘g‘risida qaror»

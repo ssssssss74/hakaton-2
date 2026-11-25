@@ -18,25 +18,31 @@ import {
 import { SimulationState } from '../../types/simulation';
 import { computeSha256 } from '../../utils/audioEffects';
 import { ThreeDSceneViewer } from '../ThreeDSceneViewer';
+import { CyberTraceGraph } from '../CyberTraceGraph';
+import { DigitalCustodyPassport } from '../DigitalCustodyPassport';
+import { FORENSIC_EVIDENCE_CATALOG, SMART_LOCK_PASSPORT } from '../../scene/evidenceCatalog';
 
 interface Step2EvidenceBoardProps {
   state: SimulationState;
   onToggleClue: (clueId: string) => void;
   onCompleteStep2: () => void;
+  onSolveDfir: (caseId: 'case1' | 'case2', artifact: string) => void;
   onNextStep: () => void;
 }
 
-type EvidenceTab = 'bank' | 'chat' | 'billing';
+type EvidenceTab = 'bank' | 'chat' | 'billing' | 'passports';
 
 export const Step2EvidenceBoard: React.FC<Step2EvidenceBoardProps> = ({
   state,
   onToggleClue,
   onCompleteStep2,
+  onSolveDfir,
   onNextStep,
 }) => {
   const [activeTab, setActiveTab] = useState<EvidenceTab>('bank');
   const [clueHashes, setClueHashes] = useState<Record<string, string>>({});
   const [verifyingClueId, setVerifyingClueId] = useState<string | null>(null);
+  const chainBroken = state.step1ChoiceId === 'informal_call';
 
   const handleVerifyHash = async (clueId: string, text: string) => {
     setVerifyingClueId(clueId);
@@ -56,11 +62,29 @@ export const Step2EvidenceBoard: React.FC<Step2EvidenceBoardProps> = ({
 
   return (
     <div className="space-y-6">
-      <ThreeDSceneViewer pinnedClues={state.pinnedClueIds} onTogglePinClue={onToggleClue} />
+      <ThreeDSceneViewer
+        pinnedClues={state.pinnedClueIds}
+        onTogglePinClue={onToggleClue}
+        chainBroken={chainBroken}
+        investigatorName={state.studentName}
+      />
+
+      {/* Interactive Kiber-izlar Xaritasi + Mini-DFIR */}
+      <CyberTraceGraph
+        activeCaseId={
+          state.pinnedClueIds.includes('Dalil_Pichoq') || state.pinnedClueIds.includes('Dalil_Xat')
+            ? 'case2'
+            : 'case1'
+        }
+        solvedCases={state.solvedDfirCases || []}
+        chainBroken={chainBroken}
+        investigatorName={state.studentName}
+        onSolveDfir={onSolveDfir}
+      />
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Left: Interactive Digital Evidence Viewer */}
-        <div className="xl:col-span-7 bg-white border border-[#E2E8F0] rounded-xl p-6 space-y-5">
+        <div className="xl:col-span-7 surface-card rounded-2xl p-6 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-[#0F172A]">
@@ -101,7 +125,7 @@ export const Step2EvidenceBoard: React.FC<Step2EvidenceBoardProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('billing')}
-              className={`flex-1 min-w-[130px] inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+              className={`flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'billing'
                   ? 'bg-white text-[#0F172A] shadow-sm'
                   : 'text-slate-600 hover:text-[#0F172A]'
@@ -109,6 +133,18 @@ export const Step2EvidenceBoard: React.FC<Step2EvidenceBoardProps> = ({
             >
               <RadioTower className="w-3.5 h-3.5 shrink-0" />
               <span>Aloqa billingi / IP</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('passports')}
+              className={`flex-1 min-w-[130px] inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                activeTab === 'passports'
+                  ? 'bg-[#0B1221] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-[#0F172A]'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+              <span>Pasportlar (JPK 204²)</span>
             </button>
           </div>
 
@@ -225,10 +261,37 @@ export const Step2EvidenceBoard: React.FC<Step2EvidenceBoardProps> = ({
               </table>
             </div>
           )}
+
+          {/* Tab 4: Digital Chain of Custody Passports (JPK 204² / 95¹) */}
+          {activeTab === 'passports' && (
+            <div className="space-y-3">
+              <DigitalCustodyPassport
+                title={FORENSIC_EVIDENCE_CATALOG.Dalil_Kompyuter.title}
+                hash={FORENSIC_EVIDENCE_CATALOG.Dalil_Kompyuter.hash}
+                passport={FORENSIC_EVIDENCE_CATALOG.Dalil_Kompyuter.custodyPassport}
+                chainBroken={chainBroken}
+                investigatorOverride={state.studentName}
+              />
+              <DigitalCustodyPassport
+                title={FORENSIC_EVIDENCE_CATALOG.Dalil_Smartfon.title}
+                hash={FORENSIC_EVIDENCE_CATALOG.Dalil_Smartfon.hash}
+                passport={FORENSIC_EVIDENCE_CATALOG.Dalil_Smartfon.custodyPassport}
+                chainBroken={chainBroken}
+                investigatorOverride={state.studentName}
+              />
+              <DigitalCustodyPassport
+                title={SMART_LOCK_PASSPORT.title}
+                hash={SMART_LOCK_PASSPORT.hash}
+                passport={SMART_LOCK_PASSPORT.custodyPassport}
+                chainBroken={chainBroken}
+                investigatorOverride={state.studentName}
+              />
+            </div>
+          )}
         </div>
 
         {/* Right: Interactive Dalillar doskasi */}
-        <div className="xl:col-span-5 bg-white border border-[#E2E8F0] rounded-xl p-6 space-y-4">
+        <div className="xl:col-span-5 surface-card rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
             <div>
               <h3 className="text-base font-bold text-[#0F172A]">

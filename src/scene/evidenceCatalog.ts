@@ -9,6 +9,15 @@ export interface ForensicExpertiseReport {
   conclusion: string;
 }
 
+export interface CustodyPassportInfo {
+  isDigital: boolean;
+  evidenceCode: string;
+  seizedAt: string;
+  investigator: string;
+  storageCondition: string;
+  jpkArticle: string;
+}
+
 export interface ForensicEvidenceInfo {
   id: string;
   cluePinId: string;
@@ -21,8 +30,23 @@ export interface ForensicEvidenceInfo {
   details: string[];
   focusPosition: [number, number, number];
   focusLookAt: [number, number, number];
+  custodyPassport: CustodyPassportInfo;
   expertiseReport?: ForensicExpertiseReport;
 }
+
+export const SMART_LOCK_PASSPORT = {
+  id: 'SmartLock_4821',
+  title: 'Smart-Lock #4821 elektron qulf kirish-chiqish jurnali',
+  hash: 'c7f4a21e8d90b34c5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d',
+  custodyPassport: {
+    isDigital: true,
+    evidenceCode: 'RD-2026/0419-SL',
+    seizedAt: '25.11.2026, 22:18',
+    investigator: 'Qodirov Temur',
+    storageCondition: 'Kriptografik muhrlangan jurnal / bitma-bit nusxa',
+    jpkArticle: 'O‘zR JPK 204² va 95¹-moddalar',
+  } as CustodyPassportInfo,
+};
 
 export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
   Dalil_Pichoq: {
@@ -41,6 +65,14 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
     ],
     focusPosition: [-0.55, 1.52, 0.32],
     focusLookAt: [-0.62, 0.81, -0.78],
+    custodyPassport: {
+      isDigital: false,
+      evidenceCode: 'AD-2026/0419-01',
+      seizedAt: '25.11.2026, 22:05',
+      investigator: 'Qodirov Temur',
+      storageCondition: 'Steril qog‘oz konteyner / muhrlangan ashyoviy paket',
+      jpkArticle: 'O‘zR JPK 203, 204² va 95¹-moddalar',
+    },
     expertiseReport: {
       reportNumber: '№ 2026/11-418',
       expertiseType: 'Sud-daktiloskopik va biologik-DNK kompleks ekspertizasi',
@@ -73,6 +105,14 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
     ],
     focusPosition: [0.55, 1.5, 0.35],
     focusLookAt: [0.52, 0.8, -0.68],
+    custodyPassport: {
+      isDigital: false,
+      evidenceCode: 'YD-2026/0419-02',
+      seizedAt: '25.11.2026, 22:11',
+      investigator: 'Qodirov Temur',
+      storageCondition: 'Shaffof fayl-konvert / xolislar imzosi bilan muhrlangan',
+      jpkArticle: 'O‘zR JPK 204, 204² va 95¹-moddalar',
+    },
     expertiseReport: {
       reportNumber: '№ 2026/11-419',
       expertiseType: 'Sud-xatshunoslik (grafologik) ekspertizasi',
@@ -93,7 +133,7 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
     id: 'Dalil_Kompyuter',
     cluePinId: 'clue-billing',
     markerNumber: 3,
-    title: 'Ish stoli kompyuteri & Proksi Server',
+    title: 'Ish stoli kompyuteri va Proksi tuguni',
     category: 'Raqamli Dalil №3',
     jpkRef: 'JPK 95¹, 172, 180, 204²-moddalar',
     desc: 'Yunusobod proksi tuguniga ulangan asosiy tizim. Brauzer keshida phishing_gate.py skriptlari, IP 185.139.137.44 va SHA-256 disk obrazi ekspertiza № 2026/11-420 da tasdiqlangan.',
@@ -105,21 +145,29 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
     ],
     focusPosition: [-0.05, 1.55, 0.55],
     focusLookAt: [-0.05, 1.05, -1.08],
+    custodyPassport: {
+      isDigital: true,
+      evidenceCode: 'RD-2026/0418-03',
+      seizedAt: '19.11.2026, 15:24',
+      investigator: 'Qodirov Temur',
+      storageCondition: 'Yozuvdan himoyalangan bitma-bit obraz (qattiq disk nusxasi)',
+      jpkArticle: 'O‘zR JPK 204² va 95¹-moddalar',
+    },
     expertiseReport: {
       reportNumber: '№ 2026/11-420',
       expertiseType: 'Sud kompyuter-texnikaviy ekspertizasi',
       institution: 'Kiberxavfsizlik va Raqamli Sud Ekspertizasi Markazi',
       date: '25.11.2026',
-      legalBasis: 'O‘zR JPK 68, 95¹, 172, 180, 184-moddalari',
+      legalBasis: 'O‘zR JPK 68, 95¹, 172, 180, 184, 204²-moddalari',
       warningRef:
         'Ekspert bila turib yolg‘on xulosa berganlik uchun O‘zR JK 238-moddasi bo‘yicha jinoiy javobgarlik haqida ogohlantirildi.',
       findings: [
-        'Qattiq diskdan write-blocker orqali olingan bit-to-bit obrazning SHA-256 xeshi (8f92b14c...1d2e3f4a) hodisa joyi bayonnomasi bilan 100% mos keldi — o‘zgartirish kiritilmagan.',
+        'Qattiq diskdan yozuvni bloklovchi qurilma orqali olingan bitma-bit obrazning SHA-256 xeshi (8f92b14c...1d2e3f4a) hodisa joyi bayonnomasi bilan 100% mos keldi — o‘zgartirish kiritilmagan.',
         'Foydalanuvchi katalogida «phishing_gate.py» skripti va soxta «TuronPay» 3D-Secure OTP yig‘uvchi veb-shablonlari 19.11.2026 soat 13:55–14:16 oralig‘ida ishga tushirilgani aniqlandi.',
         'Tarmoq jurnallari 185.139.137.44 IP manzili orqali jabrlanuvchi sessiyasidan 6 xonali OTP kodini ushlab qolish va 8600****9104 kartasiga yo‘naltirish amalga oshirilganini tasdiqladi.',
       ],
       conclusion:
-        'Tadqiq etilgan ish stoli kompyuteri (Dalil_Kompyuter) 42 500 000 so‘m mablag‘ni phishing yo‘li bilan o‘zlashtirishda bevosita qurol sifatida ishlatilgan; disk obrazi JPK 95¹, 184-moddalari talablariga muvofiq maqbul elektron dalil hisoblanadi.',
+        'Tadqiq etilgan ish stoli kompyuteri (Dalil_Kompyuter) 42 500 000 so‘m mablag‘ni phishing yo‘li bilan o‘zlashtirishda bevosita qurol sifatida ishlatilgan; disk obrazi JPK 95¹, 184 va 204²-moddalari talablariga muvofiq maqbul elektron dalil hisoblanadi.',
     },
   },
   Dalil_Smartfon: {
@@ -133,26 +181,34 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
     hash: '3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b',
     details: [
       'IMEI: 354892104491820 — Yunusobod BS-TSH-104 tayanch stansiyasi',
-      'Telegram @milliybank_sec_uz bot boshqaruv tokeni va loglari tiklandi',
+      'Telegram @orion_verify_bot boshqaruv tokeni va loglari tiklandi',
       'Sud mobil-raqamli ekspertizasi № 2026/11-421 ilova qilingan',
     ],
     focusPosition: [0.35, 1.48, 0.2],
     focusLookAt: [0.22, 0.81, -0.72],
+    custodyPassport: {
+      isDigital: true,
+      evidenceCode: 'RD-2026/0418-04',
+      seizedAt: '19.11.2026, 15:31',
+      investigator: 'Qodirov Temur',
+      storageCondition: 'Faradey paketi / bitma-bit obraz (tarmoqdan izolyatsiya)',
+      jpkArticle: 'O‘zR JPK 204² va 95¹-moddalar',
+    },
     expertiseReport: {
       reportNumber: '№ 2026/11-421',
-      expertiseType: 'Sud mobil-raqamli (forensik) ekspertizasi',
+      expertiseType: 'Sud mobil-raqamli ekspertizasi',
       institution: 'Kiberxavfsizlik va Raqamli Sud Ekspertizasi Markazi',
       date: '25.11.2026',
-      legalBasis: 'O‘zR JPK 68, 95¹, 172, 180, 184-moddalari',
+      legalBasis: 'O‘zR JPK 68, 95¹, 172, 180, 184, 204²-moddalari',
       warningRef:
         'Ekspert bila turib yolg‘on xulosa berganlik uchun O‘zR JK 238-moddasi bo‘yicha jinoiy javobgarlik haqida ogohlantirildi.',
       findings: [
-        'Samsung Galaxy A54 (IMEI: 354892104491820) qurilmasi ekranlangan Faradey paketida tarmoqdan uzilgan holda keltirilgani sababli masofadan o‘chirish (remote wipe) izlari aniqlanmadi.',
-        'Telegram lokal bazasidan o‘chirilgan yozishmalar tiklanib, @milliybank_sec_uz soxta boti orqali soat 14:10 da jabrlanuvchiga phishing havola yuborilgani va 482915 OTP kodi qabul qilingani tasdiqlandi.',
+        'Samsung Galaxy A54 (IMEI: 354892104491820) qurilmasi ekranlangan Faradey paketida tarmoqdan uzilgan holda keltirilgani sababli masofadan o‘chirish izlari aniqlanmadi.',
+        'Telegram lokal bazasidan o‘chirilgan yozishmalar tiklanib, @orion_verify_bot soxta boti orqali soat 14:10 da jabrlanuvchiga phishing havola yuborilgani va 482915 OTP kodi qabul qilingani tasdiqlandi.',
         'Qurilmaning tizim geolokatsiya keshi soat 14:15–14:19 oralig‘ida Yunusobod 4-mavze (ATM #412 hududi) koordinatalarini qayd etgan.',
       ],
       conclusion:
-        'IMEI 354892104491820 smartfoni (Dalil_Smartfon) jinoyat sodir etilgan daqiqada Yunusobod hududida faol bo‘lgan va soxta bank botini boshqargan; Faradey paketida olingan raqamli izlar JPK 95¹, 184-moddalariga ko‘ra to‘liq maqbul dalil sifatida e’tirof etiladi.',
+        'IMEI 354892104491820 smartfoni (Dalil_Smartfon) jinoyat sodir etilgan daqiqada Yunusobod hududida faol bo‘lgan va soxta bank botini boshqargan; Faradey paketida olingan raqamli izlar JPK 95¹, 184 va 204²-moddalariga ko‘ra to‘liq maqbul dalil sifatida e’tirof etiladi.',
     },
   },
   Dalil_Seyf: {
@@ -171,6 +227,14 @@ export const FORENSIC_EVIDENCE_CATALOG: Record<string, ForensicEvidenceInfo> = {
     ],
     focusPosition: [0.75, 1.45, 0.95],
     focusLookAt: [2.15, 0.52, -0.75],
+    custodyPassport: {
+      isDigital: false,
+      evidenceCode: 'AD-2026/0418-05',
+      seizedAt: '19.11.2026, 15:46',
+      investigator: 'Qodirov Temur',
+      storageCondition: 'Muhrlangan ashyoviy konteyner / xolislar ishtirokida',
+      jpkArticle: 'O‘zR JPK 104, 203 va 95¹-moddalar',
+    },
     expertiseReport: {
       reportNumber: '№ 2026/11-422',
       expertiseType: 'Sud trasologik va daktiloskopik ekspertizasi',
@@ -194,13 +258,11 @@ export function resolveEvidenceInfo(objectName: string): ForensicEvidenceInfo {
   const exact = FORENSIC_EVIDENCE_CATALOG[objectName];
   if (exact) return exact;
 
-  // Match prefix if Blender exported e.g. Dalil_Pichoq_001 or Dalil_Xat.001
   const matchedKey = Object.keys(FORENSIC_EVIDENCE_CATALOG).find((key) =>
     objectName.startsWith(key)
   );
   if (matchedKey) return FORENSIC_EVIDENCE_CATALOG[matchedKey];
 
-  // Dynamic fallback for any custom Blender Dalil_* mesh
   const cleanLabel = objectName.replace(/^Dalil_/, '').replace(/[_.-]+/g, ' ').trim();
   return {
     id: objectName,
@@ -208,14 +270,22 @@ export function resolveEvidenceInfo(objectName: string): ForensicEvidenceInfo {
     markerNumber: 0,
     title: cleanLabel ? `Dalil: ${cleanLabel}` : objectName,
     category: 'Maxsus 3D Model Dalili',
-    jpkRef: 'JPK 95-modda',
-    desc: `Yuklangan 3D sahnadagi "${objectName}" ob’ekti ashyoviy dalil sifatida belgilandi.`,
+    jpkRef: 'JPK 95¹, 204²-moddalar',
+    desc: `Yuklangan 3D sahnadagi «${objectName}» ob’ekti ashyoviy dalil sifatida belgilandi.`,
     hash: '7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e',
     details: [
-      `Blender ob’ekt nomi: ${objectName}`,
+      `3D model ob’ekt nomi: ${objectName}`,
       'Hodisa joyini ko‘zdan kechirish bayonnomasiga kiritildi',
     ],
     focusPosition: [0, 1.6, 2.2],
     focusLookAt: [0, 1.0, 0],
+    custodyPassport: {
+      isDigital: true,
+      evidenceCode: 'RD-2026/3D-CUSTOM',
+      seizedAt: '25.11.2026, 22:20',
+      investigator: 'Qodirov Temur',
+      storageCondition: 'Muhrlangan raqamli paket / bitma-bit obraz',
+      jpkArticle: 'O‘zR JPK 204² va 95¹-moddalar',
+    },
   };
 }

@@ -160,6 +160,7 @@ export interface SimulationState {
   timeline: TimelineEvent[];
   customCases: CustomCase[];
   duelJoined: boolean;
+  solvedDfirCases?: string[];
 }
 
 export interface ComputedMetrics {

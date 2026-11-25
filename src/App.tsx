@@ -28,6 +28,20 @@ import { CustomCase, DecisionFormState, SimulationState } from './types/simulati
 
 const STORAGE_KEY = 'e_tergov_lab_sim_state_v1';
 
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs = 6500
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
 export default function App() {
   const [state, setState] = useState<SimulationState>(() => {
     try {
@@ -152,6 +166,37 @@ export default function App() {
     }));
   };
 
+  const handleSolveDfir = (caseId: 'case1' | 'case2', artifact: string) => {
+    setState((prev) => {
+      const existing = prev.solvedDfirCases || [];
+      if (existing.includes(caseId)) return prev;
+      const simTime = formatSimTime(prev.hoursUsed);
+      const dfirEvent = {
+        id: `ev-dfir-${caseId}-${Date.now()}`,
+        step: 2,
+        stepLabel: 'Mini-DFIR tekshiruvi',
+        timestampSim: simTime,
+        title:
+          caseId === 'case1'
+            ? `Raqamli artefakt topildi: ${artifact}`
+            : `Alibi ziddiyati artefakti topildi: ${artifact}`,
+        detail:
+          caseId === 'case1'
+            ? 'Talaba Kiber-izlar grafi va № 2026/11-420 ekspertiza asosida proksi IP manzilini mustaqil aniqladi (+10 bonus ball).'
+            : 'Talaba Smart-Lock #4821 va restoran kamerasi (21:22) ziddiyatini mustaqil fosh qildi (+10 bonus ball).',
+        status: 'green' as const,
+        jpkRef: 'O‘zR JPK 95¹, 204²-moddalar',
+        scoreDelta: 10,
+        hoursSpent: 0,
+      };
+      return {
+        ...prev,
+        solvedDfirCases: [...existing, caseId],
+        timeline: [dfirEvent, ...prev.timeline],
+      };
+    });
+  };
+
   // Step 3 Actions
   const handleSendAgencyRequest = (reqId: string) => {
     const req = AGENCY_REQUESTS.find((r) => r.id === reqId);
@@ -248,7 +293,7 @@ export default function App() {
     };
 
     try {
-      const response = await fetch('/api/interrogate', {
+      const response = await fetchWithTimeout('/api/interrogate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -565,7 +610,7 @@ export default function App() {
   const handleStartCourtHearing = async () => {
     setIsLoadingCourtChallenge(true);
     try {
-      const response = await fetch('/api/court/challenge', {
+      const response = await fetchWithTimeout('/api/court/challenge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -616,7 +661,7 @@ export default function App() {
     const currentScore = metrics.totalScore;
 
     try {
-      const response = await fetch('/api/court/verdict', {
+      const response = await fetchWithTimeout('/api/court/verdict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -763,6 +808,7 @@ export default function App() {
           onSelectStep1Decision={handleSelectStep1Decision}
           onToggleEvidenceClue={handleToggleEvidenceClue}
           onCompleteStep2={handleCompleteStep2}
+          onSolveDfir={handleSolveDfir}
           onSendAgencyRequest={handleSendAgencyRequest}
           onUpdateDecisionForm={handleUpdateDecisionForm}
           onRunJpkAudit={handleRunJpkAudit}
@@ -786,6 +832,8 @@ export default function App() {
           fullViewport
           pinnedClues={state.pinnedClueIds}
           onTogglePinClue={handleToggleEvidenceClue}
+          chainBroken={state.step1ChoiceId === 'informal_call'}
+          investigatorName={state.studentName}
         />
       )}
 

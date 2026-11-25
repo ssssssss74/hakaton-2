@@ -19,62 +19,69 @@ export const Step1Dispatch: React.FC<Step1DispatchProps> = ({
   return (
     <div className="space-y-6">
       {/* 102 Call Summary */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
-          <h2 className="text-lg font-bold text-[#0F172A]">
-            1-bosqich: 102 Xabari va Dastlabki protsessual qaror
-          </h2>
-          <span className="text-xs font-mono tabular-nums text-slate-500">
+      <div className="surface-card rounded-2xl overflow-hidden">
+        <div className="bg-[#0B1221] text-white px-6 py-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800">
+          <div>
+            <div className="text-[11px] font-mono text-amber-300">
+              1-bosqich · 102 Tezkor navbatchilik xabari
+            </div>
+            <h2 className="text-base sm:text-lg font-bold text-white mt-0.5">
+              102 Xabari va Dastlabki protsessual qaror
+            </h2>
+          </div>
+          <span className="text-xs font-mono tabular-nums text-slate-300">
             {ACTIVE_CASE.caseNumber} · {ACTIVE_CASE.receivedDate} {ACTIVE_CASE.receivedTime}
           </span>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-3">
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-3.5">
             <p className="text-sm text-slate-700 leading-relaxed">
               {ACTIVE_CASE.summary102}
             </p>
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-4">
               <div className="text-xs font-semibold text-slate-500">
                 Jabrlanuvchi bayonoti ({ACTIVE_CASE.victimName})
               </div>
-              <p className="mt-1.5 text-sm text-slate-800 leading-relaxed">
+              <p className="mt-1.5 text-sm text-slate-800 italic leading-relaxed">
                 {ACTIVE_CASE.victimStatement}
               </p>
             </div>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2.5 text-xs">
-            <div className="font-semibold text-[#0F172A] text-sm">Navbatchilik qaydlari</div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Hudud:</span>
-              <span className="font-medium text-right text-[#0F172A]">Chilonzor IIO FMB</span>
+          <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-4 space-y-2.5 text-xs">
+            <div className="font-bold text-[#0F172A] text-sm pb-2 border-b border-slate-200/80">
+              Navbatchilik qaydlari
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-2">
+              <span className="text-slate-500">Hudud:</span>
+              <span className="font-semibold text-right text-[#0F172A]">Chilonzor IIO FMB</span>
+            </div>
+            <div className="flex justify-between gap-2">
               <span className="text-slate-500">Aloqa raqami:</span>
               <span className="font-mono tabular-nums text-[#0F172A]">{ACTIVE_CASE.victimPhone}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-2">
               <span className="text-slate-500">Zarar summasi:</span>
-              <span className="font-mono font-semibold text-[#EF4444] tabular-nums">
+              <span className="font-mono font-semibold text-[#DC2626] tabular-nums">
                 {ACTIVE_CASE.damageAmount}
               </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-2">
               <span className="text-slate-500">JPK muddati:</span>
-              <span className="font-mono text-[#0F172A]">329-modda nazorati</span>
+              <span className="font-mono text-[#1D4ED8] font-medium">329-modda nazorati</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Decision Options */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 space-y-4">
-        <div>
+      <div className="surface-card rounded-2xl p-6 space-y-4">
+        <div className="pb-3 border-b border-slate-100">
           <h3 className="text-base font-bold text-[#0F172A]">
             Dastlabki harakatingizni tanlang
           </h3>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-xs sm:text-sm text-slate-600">
             Tanlangan qaror protsessual muddat taymeriga ta’sir qiladi va «Xato narxi»
             jurnalida qayd etiladi.
           </p>
@@ -94,13 +101,13 @@ export const Step1Dispatch: React.FC<Step1DispatchProps> = ({
                 className={`w-full text-left p-4 rounded-xl border transition-all ${
                   isSelected
                     ? opt.status === 'green'
-                      ? 'bg-emerald-50/60 border-emerald-400'
+                      ? 'bg-emerald-50/70 border-emerald-400 shadow-xs'
                       : opt.status === 'yellow'
-                        ? 'bg-amber-50/60 border-amber-400'
-                        : 'bg-red-50/60 border-red-400'
+                        ? 'bg-amber-50/70 border-amber-400 shadow-xs'
+                        : 'bg-red-50/70 border-red-400 shadow-xs'
                     : disabled
                       ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed'
-                      : 'bg-white border-[#E2E8F0] hover:border-[#1D4ED8] hover:bg-blue-50/30 cursor-pointer'
+                      : 'bg-white border-slate-200 hover:border-[#1D4ED8] hover:bg-blue-50/30 hover:-translate-y-0.5 hover:shadow-xs cursor-pointer'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">

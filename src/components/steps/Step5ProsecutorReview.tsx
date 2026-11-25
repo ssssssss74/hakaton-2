@@ -50,7 +50,7 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: Indictment Summary & Checklist */}
-        <div className="lg:col-span-6 bg-white border border-[#E2E8F0] rounded-xl p-6 space-y-5">
+        <div className="lg:col-span-6 surface-card rounded-2xl p-6 space-y-5">
           <div className="pb-3 border-b border-slate-100">
             <h2 className="text-lg font-bold text-[#0F172A]">
               5-bosqich: Ayblov xulosasi loyihasi
@@ -142,7 +142,7 @@ export const Step5ProsecutorReview: React.FC<Step5ProsecutorReviewProps> = ({
         </div>
 
         {/* Right: Virtual Prosecutor Audit Output */}
-        <div className="lg:col-span-6 bg-white border border-[#E2E8F0] rounded-xl p-6 space-y-5">
+        <div className="lg:col-span-6 surface-card rounded-2xl p-6 space-y-5">
           <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-[#1D4ED8]" />
