@@ -110,19 +110,19 @@ export const InstructorAnalyticsView: React.FC<InstructorAnalyticsViewProps> = (
   return (
     <div className="space-y-7">
       {/* Header & Add Case CTA */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-5 border-b border-cyan-500/20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-5 border-b border-[#C0CEC8]">
         <div>
-          <div className="text-xs font-mono font-medium text-cyan-300">
+          <div className="text-xs font-mono font-semibold text-teal-800">
             Huquqni muhofaza qilish akademiyasi · O‘qituvchi va kafedra paneli
           </div>
-          <h1 className="mt-1.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-100">
+          <h1 className="mt-1.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
             O‘qituvchi Tahlil Paneli va Kazus Konstruktori
           </h1>
         </div>
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#1D4ED8] hover:bg-blue-600 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer shadow-sm"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#0F766E] hover:bg-[#115E59] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer shadow-sm"
         >
           <PlusCircle className="w-4 h-4" />
           <span>Yangi kazus qo‘shish</span>

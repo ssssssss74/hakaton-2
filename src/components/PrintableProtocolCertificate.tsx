@@ -3,6 +3,7 @@ import { Printer, X, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { resolveActiveCaseMeta } from '../data/caseData';
 import { FORENSIC_EVIDENCE_CATALOG, SMART_LOCK_PASSPORT } from '../scene/evidenceCatalog';
 import { ComputedMetrics, SimulationState } from '../types/simulation';
+import { EPoligonLogo } from './EPoligonLogo';
 
 interface PrintableProtocolCertificateProps {
   state: SimulationState;
@@ -106,12 +107,15 @@ export const PrintableProtocolCertificate: React.FC<PrintableProtocolCertificate
         <div id="printable-protocol" className="p-6 sm:p-10 space-y-7 bg-white text-black">
           {/* SECTION 1: OFFICIAL INVESTIGATION & PROSECUTOR PROTOCOL */}
           <div className="space-y-5">
-            <div className="text-center border-b-2 border-[#0F172A] pb-4 space-y-1">
+            <div className="text-center border-b-2 border-[#0F172A] pb-4 space-y-1.5">
+              <div className="flex justify-center pb-1">
+                <EPoligonLogo size="md" className="rounded-xl border border-teal-800/30 shadow-xs" />
+              </div>
               <div className="text-[11px] font-semibold tracking-wide text-slate-700">
                 O‘ZBEKISTON RESPUBLIKASI HUQUQNI MUHOFAZA QILISH AKADEMIYASI
               </div>
               <div className="text-xs text-slate-600">
-                «Kiberxavfsizlikni huquqiy ta’minlash» magistratura mutaxassisligi · «E-Tergov Lab» laboratoriyasi
+                «Kiberxavfsizlikni huquqiy ta’minlash» magistratura mutaxassisligi · «E-Poligon» laboratoriyasi
               </div>
               <h1 className="text-lg sm:text-xl font-bold text-[#0F172A] pt-2 leading-snug">
                 HODISA JOYINI KO‘ZDAN KECHIRISH VA PROKUROR NAZORATI BAYONNOMASI
@@ -248,17 +252,20 @@ export const PrintableProtocolCertificate: React.FC<PrintableProtocolCertificate
           {/* SECTION 2: HMQA E-TERGOV LAB QUALIFICATION CERTIFICATE + SVG QR */}
           <div className="print-break-inside-avoid border-2 border-[#0F172A] rounded-xl p-5 sm:p-6 bg-slate-50/40 space-y-4">
             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-300 pb-4">
-              <div className="space-y-1">
-                <div className="text-[11px] font-mono font-semibold text-[#1D4ED8]">
-                  RAQAMLI NATIJA TASDIQNOMASI · SERIYA: {certSerial}
+              <div className="flex items-start gap-3.5">
+                <EPoligonLogo size="md" className="rounded-xl shrink-0 border border-teal-800/30" />
+                <div className="space-y-1">
+                  <div className="text-[11px] font-mono font-semibold text-teal-800">
+                    RAQAMLI NATIJA TASDIQNOMASI · SERIYA: {certSerial}
+                  </div>
+                  <h2 className="text-lg font-bold text-[#0F172A]">
+                    HMQA «E-Poligon» Malaka Sertifikati
+                  </h2>
+                  <p className="text-xs text-slate-600">
+                    Ushbu tasdiqnoma <strong className="text-[#0F172A]">{cleanStudentName}</strong> ({state.studentGroup}) tomonidan
+                    virtual kriminalistika va jinoyat-protsessual tergov simulyatsiyasi muvaffaqiyatli bajarilganini tasdiqlaydi.
+                  </p>
                 </div>
-                <h2 className="text-lg font-bold text-[#0F172A]">
-                  HMQA «E-Tergov Lab» Malaka Sertifikati
-                </h2>
-                <p className="text-xs text-slate-600">
-                  Ushbu tasdiqnoma <strong className="text-[#0F172A]">{cleanStudentName}</strong> ({state.studentGroup}) tomonidan
-                  virtual kriminalistika va jinoyat-protsessual tergov simulyatsiyasi muvaffaqiyatli bajarilganini tasdiqlaydi.
-                </p>
               </div>
 
               {/* Deterministic Vector SVG QR Code */}

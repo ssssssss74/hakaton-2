@@ -6,6 +6,8 @@ import tabletHeroCommand from './images/tablet_hero_command_1795618517566.jpg';
 import visualAiPolygraph from './images/visual_ai_polygraph_1795618512626.jpg';
 import visualCyberTrace from './images/visual_cyber_trace_1795618524614.jpg';
 import epoligonLogoEmblem from './images/epoligon_logo_emblem_1795639177208.jpg';
+import visualDispatch102 from './images/visual_dispatch_102_1795639858854.jpg';
+import visualProsecutorDesk from './images/visual_prosecutor_desk_1795639861385.jpg';
 
 export const VISUAL_ASSETS = {
   forensicCommand: heroForensicCommand,
@@ -16,4 +18,6 @@ export const VISUAL_ASSETS = {
   aiPolygraph: visualAiPolygraph,
   cyberTrace: visualCyberTrace,
   epoligonLogo: epoligonLogoEmblem,
+  dispatch102: visualDispatch102,
+  prosecutorDesk: visualProsecutorDesk,
 } as const;

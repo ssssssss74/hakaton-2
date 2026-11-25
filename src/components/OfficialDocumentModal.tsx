@@ -3,6 +3,7 @@ import { Printer, X, CheckCircle2, Shield, QrCode } from 'lucide-react';
 import { EVIDENCE_CLUES, JK_OPTIONS, resolveActiveCaseMeta } from '../data/caseData';
 import { FORENSIC_EVIDENCE_CATALOG } from '../scene/evidenceCatalog';
 import { SimulationState } from '../types/simulation';
+import { EPoligonLogo } from './EPoligonLogo';
 
 interface OfficialDocumentModalProps {
   type: 'decision' | 'indictment';
@@ -66,7 +67,7 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
       <div className="bg-white border border-[#E2E8F0] rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[90vh] print:max-h-none print:shadow-none print:border-none">
         {/* Modal Top Actions (Hidden in print) */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 rounded-t-2xl print:hidden">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#1D4ED8]">
+          <div className="flex items-center gap-2 text-xs font-semibold text-teal-800">
             <Shield className="w-4 h-4" />
             <span>Rasmiy Protsessual Hujjat Blankasi (JPK talablari)</span>
           </div>
@@ -94,16 +95,7 @@ export const OfficialDocumentModal: React.FC<OfficialDocumentModalProps> = ({
           {/* State Emblem & Header */}
           <div className="text-center space-y-2 border-b-2 border-double border-slate-300 pb-6">
             <div className="flex justify-center">
-              {/* Uzbekistan State Emblem SVG Graphic */}
-              <div className="w-16 h-16 rounded-full border-2 border-blue-900 flex items-center justify-center p-1 bg-amber-50">
-                <svg viewBox="0 0 100 100" className="w-14 h-14 text-blue-900 fill-current">
-                  <circle cx="50" cy="50" r="46" fill="#F8FAFC" stroke="#1E3A8A" strokeWidth="2.5" />
-                  <path d="M50 12 L53 22 L63 22 L55 28 L58 38 L50 32 L42 38 L45 28 L37 22 L47 22 Z" fill="#D97706" />
-                  <circle cx="50" cy="54" r="18" fill="#1E3A8A" />
-                  <path d="M38 52 Q50 68 62 52" stroke="#F8FAFC" strokeWidth="3" fill="none" />
-                  <path d="M22 68 Q50 82 78 68" stroke="#16A34A" strokeWidth="3" fill="none" />
-                </svg>
-              </div>
+              <EPoligonLogo size="lg" className="rounded-2xl shadow-md border-2 border-teal-800/30" />
             </div>
 
             <div className="font-sans font-bold text-xs uppercase tracking-wider text-slate-800">

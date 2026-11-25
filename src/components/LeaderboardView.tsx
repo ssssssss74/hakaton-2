@@ -42,11 +42,11 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   return (
     <div className="space-y-7">
       {/* Header */}
-      <div className="pb-5 border-b border-cyan-500/20">
-        <div className="text-xs font-mono font-medium text-cyan-300">
+      <div className="pb-5 border-b border-[#C0CEC8]">
+        <div className="text-xs font-mono font-semibold text-teal-800">
           Huquqni muhofaza qilish akademiyasi · Reyting va musobaqa
         </div>
-        <h1 className="mt-1.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-100">
+        <h1 className="mt-1.5 text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
           Talabalar Reytingi va Tergov Dueli
         </h1>
       </div>
@@ -123,9 +123,9 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
             </p>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <div className="pt-4 border-t border-[#CFD8D4] flex items-center justify-between text-xs text-slate-600">
             <span>Akademiya lokal tarmog‘i</span>
-            <span className="font-semibold text-[#1D4ED8]">Navbatdagi relizga tayyor</span>
+            <span className="font-semibold text-teal-800">Navbatdagi relizga tayyor</span>
           </div>
         </div>
       </div>
@@ -168,8 +168,8 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                     key={entry.id}
                     className={`transition-colors ${
                       entry.isCurrentUser
-                        ? 'bg-blue-50/65 font-semibold'
-                        : 'bg-white hover:bg-slate-50/70'
+                        ? 'bg-[#DCECE6] font-semibold'
+                        : 'bg-[#F5F7F6] hover:bg-[#EAF1EE]'
                     }`}
                   >
                     <td className="py-3.5 px-4 text-center font-mono font-bold">
@@ -178,7 +178,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                           <Crown className="w-3.5 h-3.5" />
                         </span>
                       ) : isTop2 ? (
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-200 text-slate-800 border border-slate-300">
                           2
                         </span>
                       ) : isTop3 ? (
@@ -186,19 +186,19 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                           3
                         </span>
                       ) : (
-                        <span className="text-slate-500">{idx + 1}</span>
+                        <span className="text-slate-600">{idx + 1}</span>
                       )}
                     </td>
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-[#0F172A] flex items-center gap-2">
+                      <div className="font-bold text-slate-950 flex items-center gap-2">
                         <span>{entry.name}</span>
                         {entry.isCurrentUser && (
-                          <span className="text-[11px] font-semibold text-[#1D4ED8]">
+                          <span className="text-[11px] font-semibold text-teal-800">
                             (Siz)
                           </span>
                         )}
                       </div>
-                      <div className="text-slate-500 font-mono text-[11px]">
+                      <div className="text-slate-600 font-mono text-[11px]">
                         {entry.group}
                       </div>
                     </td>
@@ -210,24 +210,24 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5 min-w-[110px]">
-                        <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-[#D4DFDA] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-[#1D4ED8] rounded-full"
+                            className="h-full bg-[#0F766E] rounded-full"
                             style={{ width: `${entry.proceduralAccuracy}%` }}
                           />
                         </div>
-                        <span className="font-mono tabular-nums text-slate-700 w-9 text-right">
+                        <span className="font-mono tabular-nums text-slate-800 w-9 text-right">
                           {entry.proceduralAccuracy}%
                         </span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono tabular-nums text-slate-700">
+                    <td className="py-3.5 px-4 text-right font-mono tabular-nums text-slate-800">
                       {entry.deadlineCompliance}%
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono tabular-nums text-slate-700">
+                    <td className="py-3.5 px-4 text-right font-mono tabular-nums text-slate-800">
                       {entry.evidenceStrength}%
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-base tabular-nums text-[#1D4ED8]">
+                    <td className="py-3.5 px-4 text-right font-mono font-bold text-base tabular-nums text-teal-800">
                       {entry.totalScore}
                     </td>
                   </tr>

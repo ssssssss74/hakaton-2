@@ -25,6 +25,7 @@ import {
 import { SimulationState } from '../../types/simulation';
 import { speakUzbekText, stopSpeaking } from '../../utils/audioEffects';
 import { SuspectBiometricScanner } from '../SuspectBiometricScanner';
+import { VISUAL_ASSETS } from '../../assets/visuals';
 
 interface Step4InterrogationProps {
   state: SimulationState;
@@ -288,14 +289,71 @@ export const Step4Interrogation: React.FC<Step4InterrogationProps> = ({
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Main Interrogation Chat Console */}
         <div className="xl:col-span-8 surface-card rounded-2xl flex flex-col overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#C0CEC8] flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#D7E4DF] via-[#E2EAE6] to-[#EAEFED] text-slate-900">
-            <div>
-              <div className="text-[11px] font-mono font-semibold text-teal-800">
-                4-bosqich · Audio-vizual so‘roq xonasi · {activeCase.caseNumber}
+          {/* Virtual Interrogation Chamber Live Visual Viewport */}
+          <div className="relative h-36 sm:h-40 overflow-hidden bg-[#0B1F20] border-b border-[#1E4B45]">
+            <img
+              src={VISUAL_ASSETS.aiPolygraph}
+              alt="Virtual so‘roq xonasi va biometrik kuzatuv"
+              referrerPolicy="no-referrer"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-50"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#071819]/95 via-[#0B2324]/75 to-[#071819]/55" />
+            <div className="relative z-10 h-full px-6 py-4 flex flex-col justify-between text-white">
+              <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+                <span className="inline-flex items-center gap-2 text-emerald-300 font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                  <span>KAMERA #02 · VIDEO-SO‘ROQ (JPK 91-M)</span>
+                </span>
+                <span className="text-slate-300 tabular-nums">{activeCase.caseNumber}</span>
               </div>
-              <h2 className="text-base font-bold text-slate-900 mt-0.5">
-                AI-So‘roq — Gumonlanuvchi {activeCase.suspectName}
-              </h2>
+
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <div className="text-[11px] font-mono text-teal-200 uppercase tracking-wider">
+                    4-bosqich · Virtual So‘roq Xonasi
+                  </div>
+                  <h2 className="font-editorial text-xl sm:text-2xl font-semibold text-white">
+                    Gumonlanuvchi: {activeCase.suspectName}
+                  </h2>
+                </div>
+
+                {/* Live Audio Signal Equalizer */}
+                <div className="flex items-center gap-2 bg-[#071617]/80 border border-teal-500/35 px-3 py-1.5 rounded-lg">
+                  <div className="flex items-end gap-0.5 h-4" aria-hidden="true">
+                    {[35, 80, 55, 95, 45, 75, 40].map((barH, i) => (
+                      <motion.span
+                        key={i}
+                        animate={
+                          activeSpeakingId || isListening || isSending
+                            ? { scaleY: [0.3, 1, 0.4, 0.9] }
+                            : { scaleY: 0.35 }
+                        }
+                        transition={{
+                          duration: 0.65 + i * 0.08,
+                          repeat: activeSpeakingId || isListening || isSending ? Infinity : 0,
+                        }}
+                        style={{ height: `${barH}%`, transformOrigin: 'bottom' }}
+                        className="w-1 rounded-full bg-emerald-400"
+                      />
+                    ))}
+                  </div>
+                  <span className="font-mono text-[10px] text-emerald-200">
+                    {isListening
+                      ? 'MIKROFON FAOL'
+                      : activeSpeakingId
+                        ? 'JAVOB OVOZDA'
+                        : isSending
+                          ? 'TAHLIL QILINMOQDA'
+                          : 'JONLI ALOQA'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-6 py-3 border-b border-[#C0CEC8] flex flex-wrap items-center justify-between gap-3 bg-[#E6ECE9] text-slate-900">
+            <div className="text-xs font-semibold text-teal-900">
+              Audio-vizual boshqaruv paneli
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <motion.button

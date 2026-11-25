@@ -12,6 +12,7 @@ import {
 import { STEP_DEFINITIONS, resolveActiveCaseMeta } from '../data/caseData';
 import { ComputedMetrics, NavView, SimulationState } from '../types/simulation';
 import { VISUAL_ASSETS } from '../assets/visuals';
+import { EPoligonLogo } from './EPoligonLogo';
 
 interface DashboardViewProps {
   state: SimulationState;
@@ -96,10 +97,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         <div className="relative z-10 p-6 sm:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div className="max-w-2xl space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-amber-300/95 font-medium">
-              <span>Huquqni muhofaza qilish akademiyasi</span>
-              <span aria-hidden="true" className="text-slate-500">·</span>
-              <span className="text-slate-300">Virtual tergov laboratoriyasi</span>
+            <div className="flex flex-wrap items-center gap-2.5 text-xs text-amber-300/95 font-medium">
+              <EPoligonLogo size="xs" className="rounded-lg border border-emerald-400/40" />
+              <span>E-Poligon · Huquqni muhofaza qilish akademiyasi</span>
               <span aria-hidden="true" className="text-slate-500">·</span>
               <span className="font-mono text-slate-300 tabular-nums">{activeCase.caseNumber}</span>
               {!activeCase.isDefaultCase && (
@@ -115,7 +115,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-              102 Navbatchilik qismi va Faol ish yurituvi
+              102 Navbatchilik qismi va Virtual Tergov Markazi
             </h1>
 
             <p className="text-sm text-slate-200/90 leading-relaxed max-w-xl">
@@ -128,7 +128,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <button
               type="button"
               onClick={() => onStartInvestigation(state.currentStep)}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#1D4ED8] hover:bg-blue-600 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer shadow-sm"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#0F766E] hover:bg-[#115E59] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer shadow-sm"
             >
               <span>
                 {completedSteps === 0

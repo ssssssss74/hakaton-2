@@ -488,9 +488,50 @@ Iltimos:
       server: {
         middlewareMode: true,
         hmr: false,
+        ws: false,
       },
       appType: 'spa',
     });
+
+    // Serve a clean WebSocket-free @vite/client module in dev middleware mode
+    // so CSS injection & module transforms work without opening failing HMR sockets.
+    app.get('/@vite/client', (_req, res) => {
+      res.type('application/javascript; charset=utf-8').send(`
+export class ErrorOverlay extends HTMLElement {}
+export function createHotContext() {
+  return {
+    data: {},
+    accept() {},
+    acceptExports() {},
+    dispose() {},
+    prune() {},
+    decline() {},
+    invalidate() {},
+    on() {},
+    off() {},
+    send() {},
+  };
+}
+export function updateStyle(id, content) {
+  let style = document.querySelector('style[data-vite-dev-id="' + CSS.escape(id) + '"]');
+  if (!style) {
+    style = document.createElement('style');
+    style.setAttribute('type', 'text/css');
+    style.setAttribute('data-vite-dev-id', id);
+    document.head.appendChild(style);
+  }
+  style.textContent = content;
+}
+export function removeStyle(id) {
+  const style = document.querySelector('style[data-vite-dev-id="' + CSS.escape(id) + '"]');
+  if (style) style.remove();
+}
+export function injectQuery(url) {
+  return url;
+}
+`);
+    });
+
     app.use(vite.middlewares);
   } else {
     const distDir = path.resolve(__dirname, 'dist');

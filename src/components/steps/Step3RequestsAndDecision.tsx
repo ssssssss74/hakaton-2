@@ -8,8 +8,8 @@ import {
   Clock,
   ArrowRight,
   Building2,
-  Printer,
   FileText,
+  Network,
 } from 'lucide-react';
 import {
   AGENCY_REQUESTS,
@@ -70,9 +70,120 @@ export const Step3RequestsAndDecision: React.FC<Step3Props> = ({
               Tegishli idoralarga rasmiy elektron so‘rov yuboring. Har bir so‘rov protsessual vaqtni sarflaydi va rasmiy javob xati qaytaradi.
             </p>
           </div>
-          <span className="text-xs font-mono tabular-nums text-slate-600">
-            Yuborildi: {state.sentRequestIds.length} / {AGENCY_REQUESTS.length}
+          <span className="text-xs font-mono tabular-nums font-semibold text-teal-900 bg-[#DCE7E3] border border-[#B2C7C0] px-2.5 py-1 rounded-lg">
+            Aloqa kanali: {state.sentRequestIds.length} / {AGENCY_REQUESTS.length} faol
           </span>
+        </div>
+
+        {/* Visual Interactive SVG Inter-Agency Data Exchange Topology */}
+        <div className="rounded-xl bg-[#0B2021] border border-[#1E4A45] p-4 sm:p-5 text-white overflow-hidden">
+          <div className="flex items-center justify-between text-[11px] font-mono text-emerald-300 mb-2">
+            <span className="inline-flex items-center gap-1.5 font-semibold">
+              <Network className="w-3.5 h-3.5" />
+              <span>IDORALARARO ELEKTRON ALMASHINUV TARMOG‘I (E-TERGOV HUB)</span>
+            </span>
+            <span className="text-slate-400">SSL · JPK 204²</span>
+          </div>
+
+          <svg viewBox="0 0 760 175" className="w-full h-auto">
+            {/* Connection Lines from Central Hub (120, 88) to 4 Agency Nodes */}
+            {AGENCY_REQUESTS.map((req, i) => {
+              const isSent = state.sentRequestIds.includes(req.id);
+              const targetY = 26 + i * 40;
+              const pathD = `M 168 88 C 260 88, 310 ${targetY}, 420 ${targetY}`;
+              return (
+                <g key={req.id}>
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke={isSent ? '#10B981' : '#334155'}
+                    strokeWidth={isSent ? 2.4 : 1.4}
+                    strokeDasharray={isSent ? 'none' : '5 5'}
+                  />
+                  {isSent && (
+                    <circle r="4" fill="#6EE7B7">
+                      <animateMotion dur={`${1.6 + i * 0.25}s`} repeatCount="indefinite" path={pathD} />
+                    </circle>
+                  )}
+                  {/* Agency Node Pill */}
+                  <g
+                    onClick={() => !isSent && onSendAgencyRequest(req.id)}
+                    className={!isSent ? 'cursor-pointer' : undefined}
+                  >
+                    <rect
+                      x="420"
+                      y={targetY - 14}
+                      width="326"
+                      height="28"
+                      rx="8"
+                      fill={isSent ? '#0F3D36' : '#112529'}
+                      stroke={isSent ? '#34D399' : '#2E4C4A'}
+                      strokeWidth="1.2"
+                    />
+                    <circle
+                      cx="436"
+                      cy={targetY}
+                      r="4.5"
+                      fill={isSent ? '#34D399' : '#64748B'}
+                    />
+                    <text
+                      x="449"
+                      y={targetY + 4}
+                      fill={isSent ? '#ECFDF5' : '#CBD5E1'}
+                      fontSize="11"
+                      fontFamily="sans-serif"
+                      fontWeight="600"
+                    >
+                      {req.agency.length > 34 ? `${req.agency.slice(0, 34)}…` : req.agency}
+                    </text>
+                    <text
+                      x="734"
+                      y={targetY + 4}
+                      textAnchor="end"
+                      fill={isSent ? '#6EE7B7' : '#94A3B8'}
+                      fontSize="10"
+                      fontFamily="monospace"
+                    >
+                      {isSent ? 'JAVOB KELDI' : 'YUBORISH →'}
+                    </text>
+                  </g>
+                </g>
+              );
+            })}
+
+            {/* Central Investigator Hub */}
+            <rect
+              x="16"
+              y="52"
+              width="152"
+              height="72"
+              rx="14"
+              fill="#0F766E"
+              stroke="#6EE7B7"
+              strokeWidth="1.6"
+            />
+            <text
+              x="92"
+              y="84"
+              textAnchor="middle"
+              fill="#FFFFFF"
+              fontSize="13"
+              fontWeight="700"
+              fontFamily="sans-serif"
+            >
+              E-POLIGON
+            </text>
+            <text
+              x="92"
+              y="102"
+              textAnchor="middle"
+              fill="#CCFBF1"
+              fontSize="10"
+              fontFamily="monospace"
+            >
+              TERGOV MARKAZI
+            </text>
+          </svg>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
