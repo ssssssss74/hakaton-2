@@ -159,7 +159,21 @@ export function evaluateInterrogationFallback(
     'phishing',
     'havola',
     'ekspertiza',
+    '21:22',
+    '21:14',
+    '21:38',
+    '4821',
+    'smart-lock',
+    'smart lock',
+    'restoran',
+    'pichoq',
+    'xat',
+    '2026/11-418',
+    '2026/11-419',
   ];
+
+  const knifeNoteAlibiTriggers = ['21:22', '21:14', '21:38', '4821', 'smart-lock', 'smart lock', 'restoran'];
+  const citesKnifeNoteAlibi = knifeNoteAlibiTriggers.some((kw) => q.includes(kw));
 
   const openLawfulKeywords = [
     'qayerda',
@@ -190,6 +204,20 @@ export function evaluateInterrogationFallback(
       suspectReply:
         "Menga bosim o'tkazmang! Himoyachim ishtirokida gapiraman, men hali aybdor deb topilmaganman va bunday ayblovni rad etaman.",
       alibiContradicted: false,
+    };
+  }
+
+  if (citesKnifeNoteAlibi) {
+    return {
+      trafficLight: 'green',
+      scoreDelta: 10,
+      coachTitle: "Yashil (Alibi fosh etildi!)",
+      coachExplanation:
+        "A’lo darajadagi yuzlashtirish! Soat 21:22 dagi restoran kassa kamerasi va 21:14–21:38 oralig‘idagi Smart-Lock PIN #4821 jurnali o‘rtasidagi ziddiyat gumonlanuvchining yolg‘on alibisini to‘liq barbod qildi.",
+      jpkReference: 'JPK 95¹, 96, 111, 180-moddalar',
+      suspectReply:
+        "To‘xtab turing... Smart-Lock #4821 kodi faqat menda bor edi, lekin soat 21:22 dagi restoran chekini tanishimga to‘latgan edim... Ha, 21:14 da xonadonga kirganman, lekin advokatim kelmaguncha boshqa tafsilot aytmayman.",
+      alibiContradicted: true,
     };
   }
 

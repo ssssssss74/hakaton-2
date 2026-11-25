@@ -10,6 +10,7 @@ import { InvestigationWorkspace } from './components/InvestigationWorkspace';
 import { LeaderboardView } from './components/LeaderboardView';
 import { InstructorAnalyticsView } from './components/InstructorAnalyticsView';
 import { PresentationTabletView } from './components/PresentationTabletView';
+import { ThreeDSceneViewer } from './components/ThreeDSceneViewer';
 import {
   computeMetrics,
   formatSimTime,
@@ -776,6 +777,14 @@ export default function App() {
           onSubmitCourtDefense={handleSubmitCourtDefense}
           onNavigate={handleNavigate}
           onSelectEngine={handleSetAiEngine}
+        />
+      )}
+
+      {state.activeView === 'crime_scene_3d' && (
+        <ThreeDSceneViewer
+          fullViewport
+          pinnedClues={state.pinnedClueIds}
+          onTogglePinClue={handleToggleEvidenceClue}
         />
       )}
 

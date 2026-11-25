@@ -1,4 +1,4 @@
-export type NavView = 'dashboard' | 'investigation' | 'leaderboard' | 'analytics' | 'presentation';
+export type NavView = 'dashboard' | 'investigation' | 'crime_scene_3d' | 'leaderboard' | 'analytics' | 'presentation';
 
 export type TrafficLight = 'green' | 'yellow' | 'red';
 

@@ -12,6 +12,7 @@ import {
   X,
   Presentation,
   Sparkles,
+  Box,
 } from 'lucide-react';
 import { ComputedMetrics, NavView, SimulationState } from '../types/simulation';
 
@@ -40,6 +41,12 @@ const NAV_ITEMS: Array<{
     label: 'Tergov jarayoni',
     sublabel: '102 → Sud (6 bosqich)',
     icon: Briefcase,
+  },
+  {
+    id: 'crime_scene_3d',
+    label: '3D Hodisa joyi',
+    sublabel: 'WASD virtual ko‘zdan kechirish',
+    icon: Box,
   },
   {
     id: 'presentation',
@@ -285,7 +292,13 @@ export const Layout: React.FC<LayoutProps> = ({
         )}
 
         {/* Main Content Viewport */}
-        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-[1280px] mx-auto w-full">
+        <main
+          className={
+            state.activeView === 'crime_scene_3d'
+              ? 'flex-1 min-w-0 p-3 sm:p-4 lg:p-6 w-full'
+              : 'flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-[1280px] mx-auto w-full'
+          }
+        >
           {children}
         </main>
       </div>

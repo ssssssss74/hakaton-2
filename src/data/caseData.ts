@@ -35,6 +35,15 @@ export const CASES_LIST = [
     active: true,
   },
   {
+    id: 'CASE-02-KNIFE-NOTE',
+    caseNumber: '102-2026/CHIL-0419',
+    title: '«Soxta xayrlashuv xati» — qasddan odam o‘ldirish va sahnalashtirish',
+    jkCode: 'JK 97-modda 1-qismi (Qasddan odam o‘ldirish)',
+    jpkCode: 'JPK 95¹, 137, 172, 173, 180, 203–205, 221, 322, 329-moddalar',
+    difficulty: 'Murakkab',
+    active: false,
+  },
+  {
     id: 'case-104',
     caseNumber: '102-2026/YUN-0912',
     title: "Qasddan badanga o‘rtacha og‘ir shikayet yetkazish",
@@ -53,6 +62,31 @@ export const CASES_LIST = [
     active: false,
   },
 ];
+
+export const CASE_02_KNIFE_NOTE = {
+  id: 'CASE-02-KNIFE-NOTE',
+  caseNumber: '102-2026/CHIL-0419',
+  title: '«Soxta xayrlashuv xati»',
+  jkArticle: 'O‘zR JK 97-modda 1-qismi',
+  jpkArticles: 'JPK 95¹, 137, 172, 173, 180, 203–205, 221, 322, 329-moddalar',
+  suspectName: 'J. Karimov',
+  alibiClaim:
+    'Gumonlanuvchi J. Karimov soat 21:00 dan 22:00 gacha shahar markazidagi restoranda kechki ovqatda bo‘lganini va hodisa joyiga bormaganini da’vo qilmoqda.',
+  alibiContradiction: {
+    restaurantCameraTime: '21:22',
+    smartLockWindow: '21:14–21:38',
+    smartLockPin: '#4821',
+    summary:
+      'Restoran kassa kamerasi va to‘lov chekida J. Karimov soat 21:22 da emas, balki uning kartasi boshqa shaxs tomonidan ishlatilgani; Smart-Lock PIN #4821 jurnali va GPS/BTS billingi esa aynan 21:14–21:38 oralig‘ida xonadonga kirib-chiqqanini isbotlaydi.',
+  },
+  keyEvidenceIds: [
+    'Dalil_Pichoq',
+    'Dalil_Xat',
+    'Smart-Lock PIN #4821 jurnali',
+    'GPS/BTS billingi',
+    'Restoran kassa kamerasi + to‘lov cheki (21:22)',
+  ],
+};
 
 export const STEP_DEFINITIONS = [
   { id: 1, shortLabel: '102 Xabari', fullTitle: '102 Xabari va Dastlabki qaror' },
@@ -488,6 +522,16 @@ export const INSTRUCTOR_GROUP_TREND = [
 ];
 
 export const INITIAL_CUSTOM_CASES: CustomCase[] = [
+  {
+    id: 'CASE-02-KNIFE-NOTE',
+    caseNumber: '102-2026/CHIL-0419',
+    title: '«Soxta xayrlashuv xati» (Dalil_Pichoq + Dalil_Xat + Smart-Lock #4821)',
+    category: 'Qasddan odam o‘ldirish (JK 97-modda 1-qismi)',
+    summary102:
+      'Xonadonda oshxona pichog‘i (№ 2026/11-418) va soxta xayrlashuv xati (№ 2026/11-419) topilgan. Smart-Lock PIN #4821 (21:14–21:38), GPS/BTS billingi va restoran kassa kamerasi (21:22) gumonlanuvchi J. Karimovning yolg‘on alibisini fosh etadi.',
+    difficulty: 'Murakkab',
+    createdAt: '25.11.2026',
+  },
   {
     id: 'case-preset-2',
     caseNumber: '102-2026/SAM-0192',

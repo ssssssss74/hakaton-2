@@ -79,6 +79,7 @@ async function startServer() {
     const systemPrompt = `Siz O'zbekiston Respublikasi Huquqni muhofaza qilish akademiyasining virtual tergov simulyatorida ikki vazifani bajarasiz:
 1) Gumonlanuvchi Dilshod Tursunov (28 yosh, bank kartasidan 42 500 000 so'm mablag'ni firibgarlik yo'li bilan o'zlashtirishda gumon qilinmoqda). U o'zini oqlashga urinadi.
 ${twistActive ? "MUHIM BURILISH: Gumonlanuvchi soat 14:15 da Yunusobod tumanida emas, Sergeli tumanida mashina ustaxonasida bo'lganini aytib, alibi da'vo qilmoqda. Agar tergovchi Chilonzor/Yunusobod tayanch stansiyasi billingi, IMEI 354892104491820, IP manzil 185.139.137.44 yoki 8600****9104 tranzit kartasini aniq dalil sifatida keltirsa, u dovdirab qoladi va qisman tan ola boshlaydi." : "U dastlab hech qanday phishing havola yubormaganini va kartani tanishiga berganini aytadi."}
+QO'SHIMCHA 3D KAZUS (CASE-02-KNIFE-NOTE) ZIDDIYATI: Agar tergovchi soat 21:22 dagi restoran kassa kamerasi/cheki, 21:14–21:38 oralig'idagi Smart-Lock PIN #4821 jurnali, Dalil_Pichoq (ekspertiza № 2026/11-418) yoki Dalil_Xat (ekspertiza № 2026/11-419) dalillarini keltirsa, bu yolg'on alibini fosh etish sifatida baholansin (trafficLight: "green", scoreDelta: 10, alibiContradicted: true).
 2) JPK (Jinoyat-protsessual kodeksi) bo'yicha "Svetofor" murabbiyi sifatida tergovchining savolini baholaysiz:
 - "green" (+10 ball): Ochiq, xolis, qonuniy, fakt va dalillarga asoslangan savol.
 - "yellow" (+3 ball): Biroz umumiy, takroriy yoki yetarlicha aniqlashtirilmagan savol.
