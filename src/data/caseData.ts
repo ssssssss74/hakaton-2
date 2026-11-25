@@ -514,6 +514,7 @@ export function createInitialState(): SimulationState {
   return {
     studentName: 'Qodirov Temur (Siz)',
     studentGroup: 'HMQA-302',
+    aiEngine: 'gemini',
     activeView: 'dashboard',
     currentStep: 1,
     maxUnlockedStep: 1,

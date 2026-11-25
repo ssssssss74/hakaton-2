@@ -36,6 +36,7 @@ interface InvestigationWorkspaceProps {
   onStartCourtHearing: () => Promise<void>;
   onSubmitCourtDefense: (defense: string) => Promise<void>;
   onNavigate: (view: NavView) => void;
+  onSelectEngine: (engine: 'gemini' | 'claude') => void;
 }
 
 export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
@@ -62,6 +63,7 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
   onStartCourtHearing,
   onSubmitCourtDefense,
   onNavigate,
+  onSelectEngine,
 }) => {
   const currentStep = state.currentStep;
   const [showAiModal, setShowAiModal] = useState(false);
@@ -100,7 +102,11 @@ export const InvestigationWorkspace: React.FC<InvestigationWorkspaceProps> = ({
       </div>
 
       {showAiModal && (
-        <AIExpertAssistantModal state={state} onClose={() => setShowAiModal(false)} />
+        <AIExpertAssistantModal
+          state={state}
+          onClose={() => setShowAiModal(false)}
+          onSelectEngine={onSelectEngine}
+        />
       )}
 
       {/* Top Stepper */}

@@ -1,4 +1,4 @@
-export type NavView = 'dashboard' | 'investigation' | 'leaderboard' | 'analytics';
+export type NavView = 'dashboard' | 'investigation' | 'leaderboard' | 'analytics' | 'presentation';
 
 export type TrafficLight = 'green' | 'yellow' | 'red';
 
@@ -132,6 +132,7 @@ export interface StudentLeaderboardEntry {
 export interface SimulationState {
   studentName: string;
   studentGroup: string;
+  aiEngine: 'gemini' | 'claude';
   activeView: NavView;
   currentStep: number;
   maxUnlockedStep: number;

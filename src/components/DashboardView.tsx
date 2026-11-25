@@ -7,6 +7,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   FolderOpen,
+  Sparkles,
+  Presentation,
 } from 'lucide-react';
 import { ACTIVE_CASE, STEP_DEFINITIONS } from '../data/caseData';
 import { ComputedMetrics, NavView, SimulationState } from '../types/simulation';
@@ -56,6 +58,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               : `${state.currentStep}-bosqichdan davom ettirish`}
           </span>
           <ArrowRight className="w-4 h-4 shrink-0" />
+        </button>
+      </div>
+
+      {/* Presentation Pitch Banner */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white rounded-2xl p-4 sm:p-5 border border-indigo-500/30 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center shrink-0">
+            <Presentation className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Taqdimot & Hakamlar Rejimi</span>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-blue-500/30 text-blue-200">1 ta Planshetda</span>
+            </div>
+            <h3 className="text-sm sm:text-base font-bold text-white mt-0.5">
+              Butun platforma slaydlari va 2 daqiqalik nutq tezislari
+            </h3>
+            <p className="text-xs text-slate-300 mt-0.5">
+              6 bosqich, Dual AI, Antigravity va akademik ta'sirni interaktiv planshetda namoyish qiling.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onNavigate('presentation')}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md cursor-pointer shrink-0"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Planshetni Ochish</span>
         </button>
       </div>
 

@@ -10,6 +10,8 @@ import {
   BarChart3,
   Menu,
   X,
+  Presentation,
+  Sparkles,
 } from 'lucide-react';
 import { ComputedMetrics, NavView, SimulationState } from '../types/simulation';
 
@@ -38,6 +40,12 @@ const NAV_ITEMS: Array<{
     label: 'Tergov jarayoni',
     sublabel: '102 → Sud (6 bosqich)',
     icon: Briefcase,
+  },
+  {
+    id: 'presentation',
+    label: 'Taqdimot Plansheti',
+    sublabel: 'Butun sayt 1 ta planshetda',
+    icon: Presentation,
   },
   {
     id: 'leaderboard',
@@ -128,6 +136,22 @@ export const Layout: React.FC<LayoutProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Presentation Tablet Button */}
+          <button
+            type="button"
+            onClick={() => handleSelectNav('presentation')}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              state.activeView === 'presentation'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-400'
+                : 'text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+            <span className="hidden sm:inline">Taqdimot Plansheti</span>
+            <span className="sm:hidden">Planshet</span>
+            <span className="hidden xl:inline text-[9px] uppercase tracking-wider bg-amber-400/20 text-amber-200 px-1.5 py-0.5 rounded font-mono">Pitch Deck</span>
+          </button>
 
           {/* Reset Demo Button */}
           <button

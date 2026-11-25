@@ -9,6 +9,7 @@ import { DashboardView } from './components/DashboardView';
 import { InvestigationWorkspace } from './components/InvestigationWorkspace';
 import { LeaderboardView } from './components/LeaderboardView';
 import { InstructorAnalyticsView } from './components/InstructorAnalyticsView';
+import { PresentationTabletView } from './components/PresentationTabletView';
 import {
   computeMetrics,
   formatSimTime,
@@ -61,6 +62,10 @@ export default function App() {
 
   const handleNavigate = (view: SimulationState['activeView']) => {
     setState((prev) => ({ ...prev, activeView: view }));
+  };
+
+  const handleSetAiEngine = (engine: 'gemini' | 'claude') => {
+    setState((prev) => ({ ...prev, aiEngine: engine }));
   };
 
   const handleStartInvestigation = (step = 1) => {
@@ -249,6 +254,7 @@ export default function App() {
           history: state.interrogationMessages,
           twistActive: state.twistTriggered || state.interrogationMessages.length >= 4,
           pinnedClues: state.pinnedClueIds,
+          engine: state.aiEngine,
         }),
       });
 
@@ -563,6 +569,7 @@ export default function App() {
         body: JSON.stringify({
           violations: state.prosecutorReview.flags,
           summary: ACTIVE_CASE_SUMMARY_TEXT(state),
+          engine: state.aiEngine,
         }),
       });
 
@@ -617,6 +624,7 @@ export default function App() {
           evidenceComplete,
           ethicsPassed,
           totalScore: currentScore,
+          engine: state.aiEngine,
         }),
       });
 
@@ -767,6 +775,7 @@ export default function App() {
           onStartCourtHearing={handleStartCourtHearing}
           onSubmitCourtDefense={handleSubmitCourtDefense}
           onNavigate={handleNavigate}
+          onSelectEngine={handleSetAiEngine}
         />
       )}
 
@@ -776,6 +785,14 @@ export default function App() {
           metrics={metrics}
           onJoinDuel={handleJoinDuel}
           onRecordDuelVictory={handleRecordDuelVictory}
+        />
+      )}
+
+      {state.activeView === 'presentation' && (
+        <PresentationTabletView
+          state={state}
+          onNavigate={handleNavigate}
+          onStartInvestigation={handleStartInvestigation}
         />
       )}
 

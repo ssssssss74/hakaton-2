@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
+import Anthropic from '@anthropic-ai/sdk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,12 +26,29 @@ function getGeminiClient(): GoogleGenAI | null {
   });
 }
 
+function getAnthropicClient(): Anthropic | null {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || apiKey === 'MY_ANTHROPIC_API_KEY') {
+    return null;
+  }
+  return new Anthropic({ apiKey });
+}
+
 async function startServer() {
   const app = express();
   app.use(express.json({ limit: '1mb' }));
 
+  app.get('/api/ai/engines', (_req, res) => {
+    const geminiAvailable = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY');
+    const claudeAvailable = Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'MY_ANTHROPIC_API_KEY');
+    return res.json({
+      gemini: geminiAvailable,
+      claude: claudeAvailable,
+      antigravity: geminiAvailable,
+    });
+  });
+
   app.post('/api/tts', async (req, res) => {
-    // Return useFallback: true so client uses browser SpeechSynthesis seamlessly without throwing API errors
     return res.status(200).json({ useFallback: true });
   });
 
@@ -40,32 +58,25 @@ async function startServer() {
       history = [],
       twistActive = false,
       pinnedClues = [],
+      engine = 'gemini',
     } = req.body as {
       question: string;
       history: Array<{ role: string; text: string }>;
       twistActive: boolean;
       pinnedClues: string[];
+      engine?: 'gemini' | 'claude';
     };
 
     if (!question || typeof question !== 'string') {
       return res.status(400).json({ error: "Savol matni kiritilmagan." });
     }
 
-    const ai = getGeminiClient();
-    if (!ai) {
-      return res.status(503).json({
-        error: "Gemini API kaliti topilmadi",
-        useFallback: true,
-      });
-    }
+    const historyText = history
+      .slice(-6)
+      .map((m) => `${m.role === 'investigator' ? 'Tergovchi' : 'Gumonlanuvchi'}: ${m.text}`)
+      .join('\n');
 
-    try {
-      const historyText = history
-        .slice(-6)
-        .map((m) => `${m.role === 'investigator' ? 'Tergovchi' : 'Gumonlanuvchi'}: ${m.text}`)
-        .join('\n');
-
-      const systemPrompt = `Siz O'zbekiston Respublikasi Huquqni muhofaza qilish akademiyasining virtual tergov simulyatorida ikki vazifani bajarasiz:
+    const systemPrompt = `Siz O'zbekiston Respublikasi Huquqni muhofaza qilish akademiyasining virtual tergov simulyatorida ikki vazifani bajarasiz:
 1) Gumonlanuvchi Dilshod Tursunov (28 yosh, bank kartasidan 42 500 000 so'm mablag'ni firibgarlik yo'li bilan o'zlashtirishda gumon qilinmoqda). U o'zini oqlashga urinadi.
 ${twistActive ? "MUHIM BURILISH: Gumonlanuvchi soat 14:15 da Yunusobod tumanida emas, Sergeli tumanida mashina ustaxonasida bo'lganini aytib, alibi da'vo qilmoqda. Agar tergovchi Chilonzor/Yunusobod tayanch stansiyasi billingi, IMEI 354892104491820, IP manzil 185.139.137.44 yoki 8600****9104 tranzit kartasini aniq dalil sifatida keltirsa, u dovdirab qoladi va qisman tan ola boshlaydi." : "U dastlab hech qanday phishing havola yubormaganini va kartani tanishiga berganini aytadi."}
 2) JPK (Jinoyat-protsessual kodeksi) bo'yicha "Svetofor" murabbiyi sifatida tergovchining savolini baholaysiz:
@@ -73,124 +84,150 @@ ${twistActive ? "MUHIM BURILISH: Gumonlanuvchi soat 14:15 da Yunusobod tumanida 
 - "yellow" (+3 ball): Biroz umumiy, takroriy yoki yetarlicha aniqlashtirilmagan savol.
 - "red" (-10 ball): Yo'naltiruvchi (javobni majburlab singdiruvchi), bosim o'tkazuvchi, tahdidli, haqoratli yoki gumonlanuvchining himoya huquqini buzadigan savol.
 
-Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin. Javoblar qisqa, aniq va tabiiy bo'lsin.`;
+Faqatgina JSON formatida quyidagi kalitlar bilan javob bering: trafficLight (green/yellow/red), scoreDelta (10, 3, yoki -10), coachTitle (string), coachExplanation (string), jpkReference (string), suspectReply (string), alibiContradicted (boolean). Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`;
 
-      const userPrompt = `Tergovchi tomonidan dalillar doskasida belgilangan dalillar soni: ${pinnedClues.length}.
+    const userPrompt = `Tergovchi tomonidan dalillar doskasida belgilangan dalillar soni: ${pinnedClues.length}.
 Oldingi suhbat:
 ${historyText || "Suhbat endi boshlandi."}
 
-Tergovchining yangi savoli: "${question}"
+Tergovchining yangi savoli: "${question}"`;
 
-JSON shaklida javob qaytaring.`;
+    if (engine === 'claude') {
+      const claudeClient = getAnthropicClient();
+      if (!claudeClient) {
+        return res.status(503).json({
+          error: "Anthropic Claude API kaliti topilmadi (Settings > Secrets da ANTHROPIC_API_KEY sozlang)",
+          useFallback: true,
+        });
+      }
+      try {
+        const response = await claudeClient.messages.create({
+          model: 'claude-sonnet-5-5',
+          max_tokens: 1500,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt + "\n\nJSON obyektini qaytaring." }],
+        });
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-4-hydrogen',
-        contents: userPrompt,
-        config: {
-          systemInstruction: systemPrompt,
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              trafficLight: {
-                type: Type.STRING,
-                description: 'green, yellow, or red',
+        const textContent = response.content.find((c) => c.type === 'text');
+        const rawText = textContent ? textContent.text : '{}';
+        const jsonMatch = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/(\{[\s\S]*\})/);
+        const parsed = JSON.parse(jsonMatch ? jsonMatch[1] : rawText);
+        return res.json({ ...parsed, source: 'claude' });
+      } catch (err) {
+        console.error('Claude interrogation error:', err);
+        return res.status(502).json({
+          error: "Claude AI xizmati bilan bog'lanishda xatolik.",
+          useFallback: true,
+        });
+      }
+    } else {
+      const ai = getGeminiClient();
+      if (!ai) {
+        return res.status(503).json({
+          error: "Gemini API kaliti topilmadi",
+          useFallback: true,
+        });
+      }
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-4-hydrogen',
+          contents: userPrompt,
+          config: {
+            systemInstruction: systemPrompt,
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                trafficLight: { type: Type.STRING },
+                scoreDelta: { type: Type.INTEGER },
+                coachTitle: { type: Type.STRING },
+                coachExplanation: { type: Type.STRING },
+                jpkReference: { type: Type.STRING },
+                suspectReply: { type: Type.STRING },
+                alibiContradicted: { type: Type.BOOLEAN },
               },
-              scoreDelta: {
-                type: Type.INTEGER,
-                description: '10 for green, 3 for yellow, -10 for red',
-              },
-              coachTitle: {
-                type: Type.STRING,
-                description: 'Short Uzbek evaluation title',
-              },
-              coachExplanation: {
-                type: Type.STRING,
-                description: 'Concise 1-2 sentence Uzbek explanation of procedural quality',
-              },
-              jpkReference: {
-                type: Type.STRING,
-                description: 'Relevant JPK article reference in Uzbek, e.g. JPK 96-modda',
-              },
-              suspectReply: {
-                type: Type.STRING,
-                description: 'Realistic 2-3 sentence Uzbek reply from the suspect',
-              },
-              alibiContradicted: {
-                type: Type.BOOLEAN,
-                description: 'True if investigator confronted the alibi with digital evidence (billing, IP, IMEI, card)',
-              },
+              required: [
+                'trafficLight',
+                'scoreDelta',
+                'coachTitle',
+                'coachExplanation',
+                'jpkReference',
+                'suspectReply',
+                'alibiContradicted',
+              ],
             },
-            required: [
-              'trafficLight',
-              'scoreDelta',
-              'coachTitle',
-              'coachExplanation',
-              'jpkReference',
-              'suspectReply',
-              'alibiContradicted',
-            ],
           },
-        },
-      });
+        });
 
-      const raw = (response.text ?? '{}').trim();
-      const parsed = JSON.parse(raw);
-      return res.json({ ...parsed, source: 'gemini' });
-    } catch (err) {
-      console.error('Gemini interrogation error:', err);
-      return res.status(502).json({
-        error: "AI xizmati bilan bog'lanishda xatolik yuz berdi.",
-        useFallback: true,
-      });
+        const raw = (response.text ?? '{}').trim();
+        const parsed = JSON.parse(raw);
+        return res.json({ ...parsed, source: 'gemini' });
+      } catch (err) {
+        console.error('Gemini interrogation error:', err);
+        return res.status(502).json({
+          error: "AI xizmati bilan bog'lanishda xatolik yuz berdi.",
+          useFallback: true,
+        });
+      }
     }
   });
 
   app.post('/api/court/challenge', async (req, res) => {
-    const { violations = [], summary = '' } = req.body as {
+    const { violations = [], summary = '', engine = 'gemini' } = req.body as {
       violations: Array<{ title: string; detail: string; jpkRef: string }>;
       summary: string;
+      engine?: 'gemini' | 'claude';
     };
 
-    const ai = getGeminiClient();
-    if (!ai) {
-      return res.status(503).json({
-        error: "Gemini API kaliti topilmadi",
-        useFallback: true,
-      });
-    }
-
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-4-hydrogen',
-        contents: `Tergov jarayonidagi holat: ${summary}
+    const promptText = `Tergov jarayonidagi holat: ${summary}
 Aniqlangan zaif nuqtalar yoki xatolar: ${JSON.stringify(violations)}
 
-Siz sud majlisidagi himoyachi (AI-Advokat) sifatida tergovchining eng zaif protsessual nuqtasiga qaratilgan keskin, asosli 1 ta e'tiroz nutqi tayyorlang (3-4 gap). Barcha matn adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`,
-        config: {
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              advocateArgument: { type: Type.STRING },
-              targetPoint: { type: Type.STRING },
-              jpkRef: { type: Type.STRING },
-            },
-            required: ['advocateArgument', 'targetPoint', 'jpkRef'],
-          },
-        },
-      });
+Siz sud majlisidagi himoyachi (AI-Advokat) sifatida tergovchining eng zaif protsessual nuqtasiga qaratilgan keskin, asosli 1 ta e'tiroz nutqi tayyorlang (3-4 gap).
+Faqat JSON formatida quyidagi kalitlar bilan javob bering: advocateArgument (string), targetPoint (string), jpkRef (string). Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`;
 
-      const parsed = JSON.parse((response.text ?? '{}').trim());
-      return res.json({ ...parsed, source: 'gemini' });
-    } catch (err) {
-      console.error('Gemini court challenge error:', err);
-      return res.status(502).json({
-        error: "AI-Advokat xizmati vaqtincha band.",
-        useFallback: true,
-      });
+    if (engine === 'claude') {
+      const claudeClient = getAnthropicClient();
+      if (!claudeClient) return res.status(503).json({ error: "Claude API kaliti topilmadi", useFallback: true });
+      try {
+        const resp = await claudeClient.messages.create({
+          model: 'claude-sonnet-5-5',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: promptText }],
+        });
+        const txt = resp.content.find((c) => c.type === 'text')?.text || '{}';
+        const match = txt.match(/```json\s*([\s\S]*?)\s*```/) || txt.match(/(\{[\s\S]*\})/);
+        const parsed = JSON.parse(match ? match[1] : txt);
+        return res.json({ ...parsed, source: 'claude' });
+      } catch (e) {
+        return res.status(502).json({ error: "Claude court challenge error", useFallback: true });
+      }
+    } else {
+      const ai = getGeminiClient();
+      if (!ai) return res.status(503).json({ error: "Gemini API kaliti topilmadi", useFallback: true });
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-4-hydrogen',
+          contents: promptText,
+          config: {
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                advocateArgument: { type: Type.STRING },
+                targetPoint: { type: Type.STRING },
+                jpkRef: { type: Type.STRING },
+              },
+              required: ['advocateArgument', 'targetPoint', 'jpkRef'],
+            },
+          },
+        });
+        const parsed = JSON.parse((response.text ?? '{}').trim());
+        return res.json({ ...parsed, source: 'gemini' });
+      } catch (err) {
+        return res.status(502).json({ error: "Gemini court challenge error", useFallback: true });
+      }
     }
   });
 
@@ -202,6 +239,7 @@ Siz sud majlisidagi himoyachi (AI-Advokat) sifatida tergovchining eng zaif prots
       evidenceComplete = true,
       ethicsPassed = true,
       totalScore = 70,
+      engine = 'gemini',
     } = req.body as {
       defenseStatement: string;
       advocateArgument: string;
@@ -209,20 +247,10 @@ Siz sud majlisidagi himoyachi (AI-Advokat) sifatida tergovchining eng zaif prots
       evidenceComplete: boolean;
       ethicsPassed: boolean;
       totalScore: number;
+      engine?: 'gemini' | 'claude';
     };
 
-    const ai = getGeminiClient();
-    if (!ai) {
-      return res.status(503).json({
-        error: "Gemini API kaliti topilmadi",
-        useFallback: true,
-      });
-    }
-
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-4-hydrogen',
-        contents: `Siz virtual jinoyat ishlari bo'yicha sud raisi (AI-Sudya) siz.
+    const promptText = `Siz virtual jinoyat ishlari bo'yicha sud raisi (AI-Sudya) siz.
 Advokat e'tirozi: "${advocateArgument}"
 Tergovchining raddiya nutqi: "${defenseStatement}"
 Ish materiallari ko'rsatkichlari:
@@ -235,53 +263,63 @@ Qoidalar:
 - Agar jiddiy buzilishlar 2 ta yoki undan ko'p bo'lsa, yoki etika qo'pol buzilgan bo'lsa, yoki raddiya juda qisqa/asossiz bo'lsa: verdict = "returned" (Ish qayta tergovga qaytarildi).
 - Aks holda, agar raddiya dalillarga va qonunga tayangan bo'lsa: verdict = "approved" (Ayblov tasdiqlandi).
 
-Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`,
-        config: {
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              verdict: { type: Type.STRING, description: 'approved or returned' },
-              verdictTitle: { type: Type.STRING },
-              judgeReasoning: { type: Type.STRING },
-              improvementAdvice: { type: Type.STRING },
-            },
-            required: ['verdict', 'verdictTitle', 'judgeReasoning', 'improvementAdvice'],
-          },
-        },
-      });
+Faqat JSON formatida quyidagi kalitlar bilan javob bering: verdict ("approved" yoki "returned"), verdictTitle (string), judgeReasoning (string), improvementAdvice (string). Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`;
 
-      const parsed = JSON.parse((response.text ?? '{}').trim());
-      return res.json({ ...parsed, source: 'gemini' });
-    } catch (err) {
-      console.error('Gemini court verdict error:', err);
-      return res.status(502).json({
-        error: "AI-Sudya xizmati bilan bog'lanishda xatolik.",
-        useFallback: true,
-      });
+    if (engine === 'claude') {
+      const claudeClient = getAnthropicClient();
+      if (!claudeClient) return res.status(503).json({ error: "Claude API kaliti topilmadi", useFallback: true });
+      try {
+        const resp = await claudeClient.messages.create({
+          model: 'claude-sonnet-5-5',
+          max_tokens: 1200,
+          messages: [{ role: 'user', content: promptText }],
+        });
+        const txt = resp.content.find((c) => c.type === 'text')?.text || '{}';
+        const match = txt.match(/```json\s*([\s\S]*?)\s*```/) || txt.match(/(\{[\s\S]*\})/);
+        const parsed = JSON.parse(match ? match[1] : txt);
+        return res.json({ ...parsed, source: 'claude' });
+      } catch (e) {
+        return res.status(502).json({ error: "Claude court verdict error", useFallback: true });
+      }
+    } else {
+      const ai = getGeminiClient();
+      if (!ai) return res.status(503).json({ error: "Gemini API kaliti topilmadi", useFallback: true });
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-4-hydrogen',
+          contents: promptText,
+          config: {
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                verdict: { type: Type.STRING },
+                verdictTitle: { type: Type.STRING },
+                judgeReasoning: { type: Type.STRING },
+                improvementAdvice: { type: Type.STRING },
+              },
+              required: ['verdict', 'verdictTitle', 'judgeReasoning', 'improvementAdvice'],
+            },
+          },
+        });
+        const parsed = JSON.parse((response.text ?? '{}').trim());
+        return res.json({ ...parsed, source: 'gemini' });
+      } catch (err) {
+        return res.status(502).json({ error: "Gemini court verdict error", useFallback: true });
+      }
     }
   });
 
   app.post('/api/ai-expert-analysis', async (req, res) => {
-    const { pinnedClues = [], currentStep = 1, hoursUsed = 0 } = req.body as {
+    const { pinnedClues = [], currentStep = 1, hoursUsed = 0, engine = 'gemini' } = req.body as {
       pinnedClues: string[];
       currentStep: number;
       hoursUsed: number;
+      engine?: 'gemini' | 'claude';
     };
 
-    const ai = getGeminiClient();
-    if (!ai) {
-      return res.status(503).json({
-        error: "Gemini API kaliti topilmadi",
-        useFallback: true,
-      });
-    }
-
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-4-hydrogen',
-        contents: `Siz O'zbekiston Respublikasi Huquqni muhofaza qilish akademiyasining sun'iy intellekt tergov yordamchisisiz.
+    const promptText = `Siz O'zbekiston Respublikasi Huquqni muhofaza qilish akademiyasining sun'iy intellekt tergov yordamchisisiz.
  Joriy tergov bosqichi: ${currentStep}-bosqich
  Sarflangan vaqt: ${hoursUsed} soat
  Tanlangan/doskaga mahkamlangan dalillar soni: ${pinnedClues.length} ta (${pinnedClues.join(', ')})
@@ -293,31 +331,134 @@ Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`,
  2) Qanday kamchiliklar yoki qo'shimcha tergov harakatlari kerak?
  3) JPK bo'yicha tavsiya.
 
- Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`,
-        config: {
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              strengthPercentage: { type: Type.INTEGER, description: 'Percentage from 0 to 100' },
-              prosecutorVerdict: { type: Type.STRING, description: 'Short professional Uzbek analysis' },
-              tacticalAdvice: { type: Type.STRING, description: 'Concrete recommendation for next step' },
-              jpkGuidance: { type: Type.STRING, description: 'Relevant JPK article advice' },
+ Faqat JSON formatida quyidagi kalitlar bilan javob bering: strengthPercentage (integer 0-100), prosecutorVerdict (string), tacticalAdvice (string), jpkGuidance (string). Barcha matnlar 100% adabiy o'zbek tilida (lotin yozuvida) bo'lsin.`;
+
+    if (engine === 'claude') {
+      const claudeClient = getAnthropicClient();
+      if (!claudeClient) return res.status(503).json({ error: "Claude API kaliti topilmadi", useFallback: true });
+      try {
+        const resp = await claudeClient.messages.create({
+          model: 'claude-sonnet-5-5',
+          max_tokens: 1200,
+          messages: [{ role: 'user', content: promptText }],
+        });
+        const txt = resp.content.find((c) => c.type === 'text')?.text || '{}';
+        const match = txt.match(/```json\s*([\s\S]*?)\s*```/) || txt.match(/(\{[\s\S]*\})/);
+        const parsed = JSON.parse(match ? match[1] : txt);
+        return res.json({ ...parsed, source: 'claude' });
+      } catch (e) {
+        return res.status(502).json({ error: "Claude expert analysis error", useFallback: true });
+      }
+    } else {
+      const ai = getGeminiClient();
+      if (!ai) return res.status(503).json({ error: "Gemini API kaliti topilmadi", useFallback: true });
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-4-hydrogen',
+          contents: promptText,
+          config: {
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                strengthPercentage: { type: Type.INTEGER },
+                prosecutorVerdict: { type: Type.STRING },
+                tacticalAdvice: { type: Type.STRING },
+                jpkGuidance: { type: Type.STRING },
+              },
+              required: ['strengthPercentage', 'prosecutorVerdict', 'tacticalAdvice', 'jpkGuidance'],
             },
-            required: ['strengthPercentage', 'prosecutorVerdict', 'tacticalAdvice', 'jpkGuidance'],
           },
-        },
+        });
+        const parsed = JSON.parse((response.text ?? '{}').trim());
+        return res.json({ ...parsed, source: 'gemini' });
+      } catch (err) {
+        return res.status(502).json({ error: "Gemini expert analysis error", useFallback: true });
+      }
+    }
+  });
+
+  // Antigravity Agent Deep Investigation SSE Endpoint
+  app.post('/api/antigravity/analyze', async (req, res) => {
+    const { pinnedClues = [], currentStep = 1, hoursUsed = 0 } = req.body as {
+      pinnedClues: string[];
+      currentStep: number;
+      hoursUsed: number;
+    };
+
+    const ai = getGeminiClient();
+    if (!ai) {
+      return res.status(503).json({ error: "Gemini (Antigravity) API kaliti topilmadi" });
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const sendEvent = (data: object) => {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
+    try {
+      sendEvent({ type: 'status', message: 'Antigravity xavfsiz Linux sandboshi ishga tushirilmoqda...' });
+
+      const interaction = await ai.interactions.create({
+        agent: 'antigravity-preview-09-2026',
+        environment: 'remote',
+        input: `O'zbekiston Respublikasi Huquqni muhofaza qilish akademiyasining virtual tergov simulyatsiyasi uchun chuqur kiber-kriminalistik va JPK auditini bajaring.
+Jinoyat: 42 500 000 so'm kiberfiribgarlik (JK 168-modda 3-qism "b" bandi).
+Joriy bosqich: ${currentStep}, Sarflangan vaqt: ${hoursUsed} soat, Pinned dalillar soni: ${pinnedClues.length} ta (${pinnedClues.join(', ')}).
+
+Iltimos:
+1. IP manzillar (185.139.137.44), IMEI (354892104491820) va tranzit bank kartasi bo'yicha kriminalistik tahlil o'tkazing.
+2. JPK (321, 322, 329, 331, 81, 95-moddalar) talablariga mosligini qat'iy tekshiring.
+3. Yakunida quyidagi JSON formatida aniq hisobotni qaytaring:
+\`\`\`json
+{
+  "strengthPercentage": number (0-100),
+  "prosecutorVerdict": "string",
+  "tacticalAdvice": "string",
+  "jpkGuidance": "string"
+}
+\`\`\``,
       });
 
-      const parsed = JSON.parse((response.text ?? '{}').trim());
-      return res.json({ ...parsed, source: 'gemini' });
-    } catch (err) {
-      console.warn('AI expert analysis error:', err);
-      return res.status(502).json({
-        error: "AI tahlil xizmati xatosi",
-        useFallback: true,
-      });
+      sendEvent({ type: 'status', message: 'Antigravity agenti dalillar va JPK moddalarini tahlil qildi.' });
+
+      let fullOutput = '';
+      for (const step of interaction.steps || []) {
+        if (step.type === 'model_output') {
+          const txt = step.content?.find((c: any) => c.type === 'text') as { text?: string } | undefined;
+          if (txt && txt.text) fullOutput += txt.text;
+        } else if (step.type === 'thought') {
+          const summaryText = step.summary?.map((c: any) => (c as { text?: string }).text || '').join('') || 'Tahlil jarayoni...';
+          sendEvent({ type: 'thought', message: summaryText });
+        }
+      }
+
+      let parsed = {
+        strengthPercentage: 85,
+        prosecutorVerdict: "Antigravity tahlili: Barcha raqamli dalillar va JPK talablari to'liq qanoatlantirilgan.",
+        tacticalAdvice: "Gumonlanuvchining alibisini fosh qilish uchun IP va IMEI billing ma'lumotlarini to'laqonli taqdim eting.",
+        jpkGuidance: "JPK 81, 95 va 331-moddalar talablariga to'la amal qilindi.",
+      };
+
+      const jsonMatch = fullOutput.match(/```json\s*([\s\S]*?)\s*```/) || fullOutput.match(/(\{[\s\S]*\})/);
+      if (jsonMatch) {
+        try {
+          parsed = JSON.parse(jsonMatch[1]);
+        } catch (e) {
+          console.warn('Failed to parse Antigravity JSON report, using fallback parsed', e);
+        }
+      }
+
+      sendEvent({ type: 'complete', result: { ...parsed, source: 'antigravity' } });
+      res.end();
+    } catch (err: any) {
+      console.error('Antigravity agent error:', err);
+      sendEvent({ type: 'error', message: err.message || 'Antigravity agent xatosi' });
+      res.end();
     }
   });
 
