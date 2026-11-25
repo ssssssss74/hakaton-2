@@ -5,6 +5,7 @@ import visualAcademyDuel from './images/visual_academy_duel_1795614835488.jpg';
 import tabletHeroCommand from './images/tablet_hero_command_1795618517566.jpg';
 import visualAiPolygraph from './images/visual_ai_polygraph_1795618512626.jpg';
 import visualCyberTrace from './images/visual_cyber_trace_1795618524614.jpg';
+import epoligonLogoEmblem from './images/epoligon_logo_emblem_1795639177208.jpg';
 
 export const VISUAL_ASSETS = {
   forensicCommand: heroForensicCommand,
@@ -14,4 +15,5 @@ export const VISUAL_ASSETS = {
   tabletHeroCommand,
   aiPolygraph: visualAiPolygraph,
   cyberTrace: visualCyberTrace,
+  epoligonLogo: epoligonLogoEmblem,
 } as const;

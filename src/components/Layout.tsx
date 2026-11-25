@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ComputedMetrics, NavView, SimulationState } from '../types/simulation';
 import { PWAInstallButton, OfflineIndicator } from './PWAInstallButton';
+import { EPoligonLogo } from './EPoligonLogo';
 
 interface LayoutProps {
   state: SimulationState;
@@ -135,12 +136,10 @@ export const Layout: React.FC<LayoutProps> = ({
               onClick={() => handleSelectNav('dashboard')}
               className="flex items-center gap-3 text-left whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none group"
             >
-              <span className="w-9 h-9 rounded-lg bg-[#DCE7E3] border border-[#AFC6BE] flex items-center justify-center shrink-0 shadow-xs group-hover:border-teal-700 transition-colors">
-                <Shield className="w-4 h-4 text-teal-800" />
-              </span>
+              <EPoligonLogo size="sm" className="group-hover:border-teal-700 transition-colors" />
               <div className="leading-tight">
                 <div className="text-sm sm:text-base font-bold tracking-tight text-slate-900">
-                  E-Tergov Lab · HMQA
+                  E-Poligon · HMQA
                 </div>
                 <div className="text-[10px] font-mono text-teal-800 hidden sm:block">
                   Kiber-Kriminalistika Boshqaruv Markazi
